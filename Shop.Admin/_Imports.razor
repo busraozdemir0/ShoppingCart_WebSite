@@ -1,4 +1,6 @@
-﻿@using System.Net.Http
+﻿@* Razor sayfalarinda ortak import edilmesi gerekiyorsa buraya yazilabilir *@
+
+@using System.Net.Http
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
@@ -8,3 +10,10 @@
 @using Microsoft.JSInterop
 @using Shop.Admin
 @using Shop.Admin.Shared
+
+
+@inject NavigationManager navManager;
+@using Shop.DataModels.CustomModels;
+
+@using Shop.Admin.Services
+@inject IAdminPanelService adminPanelService;

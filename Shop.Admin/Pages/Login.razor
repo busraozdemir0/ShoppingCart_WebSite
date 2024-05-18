@@ -1,0 +1,111 @@
+﻿@page "/login"
+
+
+<style>
+    .loginBox {
+        font-family: 'Open Sans', sans-serif;
+        margin: 0 auto 0 auto;
+        width: 100%;
+        text-align: center;
+        margin: 20px 0px 20px 0px;
+    }
+
+    p {
+        font-size: 12px;
+        text-decoration: none;
+        color: #ffffff;
+    }
+
+    h1 {
+        font-size: 1.5em;
+        color: #525252;
+    }
+
+    .box {
+        background: white;
+        width: 300px;
+        border-radius: 6px;
+        margin: 0 auto 0 auto;
+        padding: 0px 0px 10px 0px;
+        border: #2877e9 4px solid;
+    }
+
+    .email {
+        background: #FFFFFF;
+        border: #ccc 1px solid;
+        border-bottom: #ccec 2px solid;
+        padding: 8px;
+        width: 250px;
+        color: #525252;
+        margin-top: 10px;
+        font-size: 1em;
+        border-radius: 4px;
+    }
+
+    .password {
+        border-radius: 4px;
+        background: #ecf0f1;
+        border: #ccc 1px solid;
+        padding: 8px;
+        width: 250px;
+        font-size: 1em;
+    }
+
+</style>
+
+<div style="min-height:400px;">
+    <div class="loginBox">
+        <div class="box">
+            <br />
+            <h1>Admin Panel</h1>
+            @if (loginModel != null)
+            {
+                <EditForm Model="@loginModel" OnValidSubmit="Login_Click">
+                    <DataAnnotationsValidator />
+
+                    <InputText type="email" name="EmailId" class="email" placeholder=email @bind-Value="loginModel.EmailId" autocoplete="off" />
+                    <ValidationMessage For="@(()=>loginModel.EmailId)" />
+
+                    <InputText type="password" name="Password" class="password" placeholder=password @bind-Value="loginModel.Password" />
+                    <ValidationMessage For="@(()=>loginModel.Password)" />
+
+                    <br /><br />
+                    <input type="submit" class="btn-primary" value="Login" />
+                </EditForm>
+            }
+        </div>
+        <div>
+            <br /><br />
+            <p style="color:#e52e50">
+                <h4>@alertMessage</h4>
+            </p>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    // Bu sayfada loginModel degiskenini kullanabilmek icin bu sekilde tanimlama yapiyoruz
+    LoginModel loginModel { get; set; }
+
+    public string alertMessage { get; set; }
+
+    protected override Task OnInitializedAsync() // Blazor isleminin baslatilmasi sirasinda LoginModel'den nesne uretilecek
+    {
+        loginModel = new LoginModel();
+        return base.OnInitializedAsync();
+    }
+
+    private async Task Login_Click()
+    {
+        var response = await adminPanelService.AdminLogin(loginModel);
+        if (response.Status == true)
+        {
+            navManager.NavigateTo("/");
+        }
+        else
+        {
+            alertMessage = response.Message;
+        }
+    }
+}
