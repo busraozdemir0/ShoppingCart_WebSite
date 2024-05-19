@@ -24,5 +24,37 @@ namespace Shop.Api.Controllers
             var data = _adminService.AdminLogin(loginModel);
             return Ok(data);
         }
+
+        [HttpPost]
+        [Route("SaveCategory")]
+        public IActionResult SaveCategory(CategoryModel newCategory)
+        {
+            var data = _adminService.SaveCategory(newCategory);
+            return Ok(data);
+        }
+
+        [HttpGet]
+        [Route("GetCategories")]
+        public IActionResult GetCategories()
+        {
+            var data = _adminService.GetCategories();
+            return Ok(data);
+        }
+
+        [HttpPost]
+        [Route("UpdateCategory")]
+        public IActionResult UpdateCategory(CategoryModel categoryToUpdate)
+        {
+            var data = _adminService.UpdateCategory(categoryToUpdate);
+            return Ok(data);
+        }
+
+        [HttpPost]
+        [Route("DeleteCategory")]
+        public IActionResult DeleteCategory(CategoryModel categoryToDelete)
+        {
+            var data = _adminService.DeleteCategory(categoryToDelete);
+            return Ok(data);
+        }
     }
 }

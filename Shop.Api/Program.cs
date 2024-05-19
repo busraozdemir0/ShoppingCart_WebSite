@@ -14,6 +14,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+/*
+    Scaffold-DbContext "Server=DESKTOP-43HIK1B; Database=ShoppingCartDB; Trusted_Connection=True; TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -force
+    kodunu Package Manager Console'a yazarak baglanti metni icin classin ve db'de yer alan tablolarin gelmesini otomatik sagladik (Baslangic projesi olarak Shop.DataModels ayarlanmali!!)
+*/
 builder.Services.AddDbContext<ShoppingCartDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
