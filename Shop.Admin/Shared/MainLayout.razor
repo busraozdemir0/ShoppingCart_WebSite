@@ -23,16 +23,36 @@
         }
 
         <article class="content px-4">
-            @Body
+            <CascadingValue Value="event_notify">
+                @Body
+            </CascadingValue>
+
         </article>
     </main>
 </div>
 
 @code {
     public bool IsAdminLoggedIn = false;
+    EventCallback event_notify => EventCallback.Factory.Create(this, NotifyLayout);
 
-    public void Logout()
+    public async void Logout()
     {
+        await sessionStorage.DeleteAsync("adminKey"); // Cikis yaptirildiginda adminKey'in silinmesi
+        await NotifyLayout();
         navManager.NavigateTo("/login"); // Cikis yapildiginda kullanici URL de belirtildigi gibi login sayfasina gidecektir
+    }
+
+    private async Task NotifyLayout()
+    {
+        var adminSession = await sessionStorage.GetAsync<string>("adminKey");
+        if (adminSession.Success)
+        {
+            IsAdminLoggedIn = true;
+        }
+        else
+        {
+            IsAdminLoggedIn = false;
+            navManager.NavigateTo("/login");
+        }
     }
 }

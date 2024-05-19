@@ -6,3 +6,16 @@
 
 Welcome to your new app.
 
+@code{
+    // Asagida yapilan islemler ile kullanici giris yapmamissa bu sayfalara erisememesini sagladik.
+    [CascadingParameter]
+    public EventCallback notify { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender){
+
+        if (firstRender)
+        {
+            await notify.InvokeAsync();
+        }
+    }
+}

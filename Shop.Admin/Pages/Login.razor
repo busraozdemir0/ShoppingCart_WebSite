@@ -85,6 +85,11 @@
 </div>
 
 @code {
+
+    // Alttaki iki satir ile tanimlanmis bir ozellik, ebeveyn bilesenden alt bilesene bir geri cagirma islevinin aktarilmasini saglar.
+    [CascadingParameter]
+    public EventCallback notify { get; set; }
+
     // Bu sayfada loginModel degiskenini kullanabilmek icin bu sekilde tanimlama yapiyoruz
     LoginModel loginModel { get; set; }
 
@@ -101,6 +106,11 @@
         var response = await adminPanelService.AdminLogin(loginModel);
         if (response.Status == true)
         {
+            var user_response = response.Message.Split("|");
+            await sessionStorage.SetAsync("adminKey", user_response[0]);
+            await sessionStorage.SetAsync("adminName", user_response[1]);
+            await sessionStorage.SetAsync("adminEmail", user_response[2]);
+            await notify.InvokeAsync();
             navManager.NavigateTo("/");
         }
         else
