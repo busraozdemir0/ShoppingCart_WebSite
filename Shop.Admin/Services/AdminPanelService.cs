@@ -48,7 +48,11 @@ namespace Shop.Admin.Services
         public async Task<List<CategoryModel>> GetCategories()
         {
             return await _httpClient.GetFromJsonAsync<List<CategoryModel>>("api/Admin/GetCategories");
+        }
 
+        public async Task<List<ProductModel>> GetProducts()
+        {
+            return await _httpClient.GetFromJsonAsync<List<ProductModel>>("api/Admin/GetProducts");
         }
 
         public async Task<bool> UpdateCategory(CategoryModel categoryToUpdate)
@@ -77,6 +81,33 @@ namespace Shop.Admin.Services
             }
 
             return await response.Content.ReadFromJsonAsync<bool>();
+        }
+
+        public async Task<bool> DeleteProduct(ProductModel productToDelete)
+        {
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/Admin/DeleteProduct", productToDelete);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"HTTP Status: {response.StatusCode}, Content: {errorContent}");
+            }
+
+            return await response.Content.ReadFromJsonAsync<bool>();
+        }
+
+        public async Task<ProductModel> SaveProduct(ProductModel newProduct)
+        {
+
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/Admin/SaveProduct", newProduct);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"HTTP Status: {response.StatusCode}, Content: {errorContent}");
+            }
+
+            return await response.Content.ReadFromJsonAsync<ProductModel>();
         }
 
     }

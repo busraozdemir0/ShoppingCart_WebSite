@@ -56,5 +56,39 @@ namespace Shop.Api.Controllers
             var data = _adminService.DeleteCategory(categoryToDelete);
             return Ok(data);
         }
+
+
+        [HttpGet]
+        [Route("GetProducts")]
+        public IActionResult GetProducts()
+        {
+            var data = _adminService.GetProducts();
+            return Ok(data);
+        }
+
+        [HttpPost]
+        [Route("SaveProduct")]
+        public IActionResult SaveProduct(ProductModel newProduct)
+        {
+            int nextProductId = _adminService.GetNewProductId();
+            newProduct.ImageUrl = @"Images/" + nextProductId + ".png";
+            var path = $"{env.WebRootPath}\\Images\\{nextProductId + ".png"}";
+            var fs = System.IO.File.Create(path);
+            fs.Write(newProduct.FileContent, 0, newProduct.FileContent.Length);
+            fs.Close();
+
+            string uploadsFolder = Path.Combine(env.WebRootPath, "Images");
+
+            var data = _adminService.SaveProduct(newProduct);
+            return Ok(data);
+        }
+
+        [HttpPost]
+        [Route("DeleteProduct")]
+        public IActionResult DeleteProduct(ProductModel productToDelete)
+        {
+            var data = _adminService.DeleteProduct(productToDelete);
+            return Ok(data);
+        }
     }
 }

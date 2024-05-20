@@ -7,7 +7,10 @@ namespace Shop.Admin.Services
         Task<ResponseModel> AdminLogin(LoginModel loginModel);
         Task<CategoryModel> SaveCategory(CategoryModel newCategory);
         Task<List<CategoryModel>> GetCategories();
+        Task<List<ProductModel>> GetProducts();
         Task<bool> UpdateCategory(CategoryModel categoryToUpdate);
         Task<bool> DeleteCategory(CategoryModel categoryToDelete);
+        Task<bool> DeleteProduct(ProductModel productToDelete);
+        Task<ProductModel> SaveProduct(ProductModel newProduct);
     }
 }

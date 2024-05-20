@@ -18,13 +18,14 @@ namespace Shop.DataModels.Models
 
         public virtual DbSet<AdminInfo> AdminInfos { get; set; } = null!;
         public virtual DbSet<Category> Categories { get; set; } = null!;
+        public virtual DbSet<Product> Products { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-      //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-               // optionsBuilder.UseSqlServer("Server=DESKTOP-43HIK1B; Database=ShoppingCartDB; Trusted_Connection=True; TrustServerCertificate=True;");
+                //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                //optionsBuilder.UseSqlServer("Server=DESKTOP-43HIK1B; Database=ShoppingCartDB; Trusted_Connection=True; TrustServerCertificate=True;");
             }
         }
 
@@ -54,6 +55,19 @@ namespace Shop.DataModels.Models
             modelBuilder.Entity<Category>(entity =>
             {
                 entity.ToTable("Category");
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.ToTable("Product");
+
+                entity.Property(e => e.ImageUrl)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Name)
                     .HasMaxLength(100)

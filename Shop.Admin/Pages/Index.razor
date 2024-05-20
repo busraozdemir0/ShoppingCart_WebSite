@@ -1,21 +1,35 @@
 ﻿@page "/"
 
-<PageTitle>Index</PageTitle>
+@if (IsAdminLoggenIn == true)
+{
+    <h1>Hello, Admin!</h1>
 
-<h1>Hello, world!</h1>
+    <span>Welcome to Admin Panel.</span>
+}
 
-Welcome to your new app.
 
-@code{
+@code {
     // Asagida yapilan islemler ile kullanici giris yapmamissa bu sayfalara erisememesini sagladik.
     [CascadingParameter]
     public EventCallback notify { get; set; }
+    public bool IsAdminLoggenIn = false;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender){
-
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
         if (firstRender)
         {
             await notify.InvokeAsync();
+
+            var adminSession = await sessionStorage.GetAsync<string>("adminKey");
+            if (adminSession.Success)
+            {
+                IsAdminLoggenIn = true;
+                StateHasChanged();
+            }
+            else
+            {
+                navManager.NavigateTo("/login");
+            }
         }
     }
 }
