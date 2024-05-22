@@ -12,5 +12,7 @@ namespace Shop.Admin.Services
         Task<bool> DeleteCategory(CategoryModel categoryToDelete);
         Task<bool> DeleteProduct(ProductModel productToDelete);
         Task<ProductModel> SaveProduct(ProductModel newProduct);
+        Task<List<StockModel>> GetProductStock();
+        Task<bool> UpdateProductStock(StockModel stock);
     }
 }

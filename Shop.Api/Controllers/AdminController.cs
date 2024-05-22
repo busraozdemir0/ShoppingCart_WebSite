@@ -90,5 +90,21 @@ namespace Shop.Api.Controllers
             var data = _adminService.DeleteProduct(productToDelete);
             return Ok(data);
         }
+
+        [HttpGet]
+        [Route("GetProductStock")]
+        public IActionResult GetProductStock() // Tum urun adlarini stoklariyla birlikte getirme
+        {
+            var data = _adminService.GetProductStock();
+            return Ok(data);
+        }
+
+        [HttpPost]
+        [Route("UpdateProductStock")]  // Urunun stogunu guncelleme islemi
+        public IActionResult UpdateProductStock(StockModel stock)
+        {
+            var data = _adminService.UpdateProductStock(stock);
+            return Ok(data);
+        }
     }
 }

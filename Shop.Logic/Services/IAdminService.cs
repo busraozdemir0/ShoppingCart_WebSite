@@ -20,5 +20,8 @@ namespace Shop.Logic.Services
         bool DeleteProduct(ProductModel productToDelete);
         int GetNewProductId();
         ProductModel SaveProduct(ProductModel newProduct);
+
+        List<StockModel> GetProductStock();
+        bool UpdateProductStock(StockModel stock);
     }
 }

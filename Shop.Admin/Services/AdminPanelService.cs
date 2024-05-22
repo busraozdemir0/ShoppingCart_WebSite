@@ -4,6 +4,8 @@ using System.Net.Http.Json;
 
 namespace Shop.Admin.Services
 {
+    // Burada yer alan metotlar verilen nesneyi API endpointine gondererek ilgili adimlari isler.
+    // Yani projede yer alan API katmani burada kullanilmaktadir.
     public class AdminPanelService : IAdminPanelService
     {
         private readonly HttpClient _httpClient;
@@ -108,6 +110,26 @@ namespace Shop.Admin.Services
             }
 
             return await response.Content.ReadFromJsonAsync<ProductModel>();
+        }
+
+        public async Task<List<StockModel>> GetProductStock()
+        {
+            return await _httpClient.GetFromJsonAsync<List<StockModel>>("api/Admin/GetProductStock");
+        }
+
+        // Bu metot verilen  StockModel nesnesini bir API endpointine gonderir ve islemin basarili olup olmadigini kontrol eder. Eger istek basarili olursa yanit icerigi JSON formatinda okunur ve bool turune donusturulur.
+        public async Task<bool> UpdateProductStock(StockModel stock)  // Urunun stogunu guncelleme islemi
+        {
+
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/Admin/UpdateProductStock", stock);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"HTTP Status: {response.StatusCode}, Content: {errorContent}");
+            }
+
+            return await response.Content.ReadFromJsonAsync<bool>(); // Yaniti bool turune donusturme islemi
         }
 
     }

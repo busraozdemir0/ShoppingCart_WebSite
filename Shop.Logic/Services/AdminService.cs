@@ -179,5 +179,41 @@ namespace Shop.Logic.Services
                 throw;
             }
         }
+
+        public List<StockModel> GetProductStock()
+        {
+            List<StockModel> productStock = new List<StockModel>();
+
+            List<Category> categoryData = _dbContext.Categories.ToList();
+            List<Product> productData = _dbContext.Products.ToList();
+
+            foreach(var p in productData)
+            {
+                // Mevcutta var olan urunun adini, stogunu, kategorisini StockModel'e atama (ardindan bu Stock Model uzerinden stok guncelleme islemi yapilacak)
+                StockModel _stockModel = new StockModel();
+                _stockModel.Id = p.Id;
+                _stockModel.Name = p.Name;
+                _stockModel.Stock = p.Stock;
+                _stockModel.CategoryName = categoryData.Where(x => x.Id == p.CategoryId).Select(x => x.Name).FirstOrDefault();
+                productStock.Add(_stockModel);
+
+            }
+            return productStock;
+        }
+
+        // Urunun stogunu guncelleme islemi
+        public bool UpdateProductStock(StockModel stock)
+        {
+            bool flag = false;
+            var _product = _dbContext.Products.Where(x => x.Id == stock.Id).First(); // Gelen stock id'sini Product tablosunda bul
+            if(_product != null) // product bos donmuyorsa stock guncelleme islemi
+            {
+                _product.Stock = stock.Stock + stock.NewStock; // Mevcutta var olan stok miktari uzerine yeni stok miktari ekleme
+                _dbContext.Products.Update(_product);
+                _dbContext.SaveChanges();
+                flag = true;
+            }
+            return flag;
+        }
     }
 }
