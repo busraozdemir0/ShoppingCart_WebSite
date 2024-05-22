@@ -1,19 +1,153 @@
 ﻿@inherits LayoutComponentBase
 
-<PageTitle>Shop.Web</PageTitle>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<style>
+    .mainlayout {
+        max-width: 900px;
+        margin: auto;
+        background: white;
+        padding: 10px;
+    }
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+    * {
+        box-sizing: border-box;
+    }
+
+    .header {
+        color: black;
+        padding: 5px;
+        border: 1px groove #808080;
+        border-radius: 14px;
+        background: linear-gradient(-45deg, #ffd800, #808080, #23a6d5, #f5f542);
+        background-size: 400% 400%;
+    }
+
+    .footer {
+        color: black;
+        padding: 5px;
+        border: 1px groove #808080;
+        border-radius: 7px;
+        background: linear-gradient(-45deg, #ffd800, #808080, #23a6d5, #f5f542);
+        background-size: 400% 400%;
+    }
+
+    .col-container {
+        display: table;
+        width: 100%;
+        border-radius: 25px;
+    }
+
+    .col {
+        display: table-cell;
+        padding: 16px;
+    }
+
+    .divleft {
+        float: left;
+    }
+
+    .divright {
+        float: right;
+    }
+
+</style>
+
+<div class="mainlayout">
+    <div style="padding-bottom:25px;">
+        <div class="divleft" style="padding-right: 15px;">
+            <NavLink href="/">
+                Home
+            </NavLink>
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+        <div class="divleft">
+            @if (IsUserLoggedIn)
+            {
+                <i class="fa fa-user"></i>
+
+                <span>Welcome, @LoggedInUserName </span>
+            }
+            else
+            {
+                <i class="fa fa-user"></i>
+
+                <span>Welcome</span>
+
+            }
+        </div>
+        <div class="divright">
+            @if (IsUserLoggedIn)
+            {
+                <div style="padding-left:15px;">
+                    <i class="fa fa-sign-out"></i> <a @onclick="@Logout" href="#">Logout</a>
+                </div>
+            }
+
+        </div>
+
+        <div class="divright" style="padding-left:15px;">
+            @if (IsUserLoggedIn)
+            {
+                <NavLink href="myaccount">
+                    MyAccount
+                </NavLink>
+            }
+
+        </div>
+
+        <div class="divright" style="padding-left:15px;">
+            @if (!IsUserLoggedIn)
+            {
+                <NavLink href="login">
+                    Login
+                </NavLink>
+            }
+
+        </div>
+
+        <div class="divright" style="padding-left:15px;">
+            @if (!IsUserLoggedIn)
+            {
+                <NavLink href="register">
+                    Register
+                </NavLink>
+            }
+
+        </div>
+    </div>
+    <div class="header">
+        <div class="col-container">
+            <div class="col" style="border-radius:25px;">
+                <NavLink href="/">
+                    <img src="images/shopping_logo.png" style="cursor:pointer; height:5em; width:14em;" />
+                </NavLink>
+            </div>
+            <div class="col">
+
+                <a href="/mycart">
+                    <i class="fa fa-shopping-cart" style="font-size:35px; color: black; float:right;">
+                        <span style="font-size:30px; vertical-align:top; padding:5px; color:black; border-radius: 50%; padding-top:10px; font-weight:bold;"><sup>@cartCount</sup></span>
+                    </i>
+                </a>
+
+            </div>
+        </div>
+    </div>
+    <div>
+        @Body
+    </div>
+    <div class="footer">
+        &copy; @DateTime.Now.Year - Shopping Cart Application
+    </div>
 </div>
+
+@code {
+    public int cartCount = 0;
+    public bool IsUserLoggedIn = false;
+    public string LoggedInUserName = "User";
+
+    private void Logout()
+    {
+
+    }
+}

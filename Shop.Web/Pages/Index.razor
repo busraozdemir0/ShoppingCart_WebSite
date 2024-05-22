@@ -2,8 +2,72 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+<style>
+    .column {
+        float: left;
+        padding: 15px;
+    }
 
-Welcome to your new app.
+    .clearfix::after {
+        content: "";
+        clear: both;
+        display: table;
+    }
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    .menu {
+        width: 25%;
+        margin-top: 10px;
+        border: 1px outset #808080;
+        border-radius: 7px;
+        background: linear-gradient(-10deg, #ffd800, #808080, #23a6d5, #f5f542);
+        color: black;
+    }
+
+    .content {
+        width: 75%;
+    }
+
+    .menu ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .menu li {
+        padding: 8px;
+        margin-bottom: 8px;
+        color: black;
+        background-color: white;
+    }
+
+    .menu li:hover {
+        background-color: #e7e4e4;
+        color: #808080;
+    }
+
+    .stuff {
+        padding: 8px;
+        margin: 1px;
+        background-color: white;
+        border: 1px outset black;
+    }
+
+    .add-to-cart {
+        border: 1px outset #808080;
+        width: 100%;
+        background-color: #b6ff00;
+    }
+</style>
+
+<div style="min-height:600px;">
+    <div class="column menu">
+
+    </div>
+    <div class="column content">
+
+    </div>
+</div>
+
+@code{
+
+}
