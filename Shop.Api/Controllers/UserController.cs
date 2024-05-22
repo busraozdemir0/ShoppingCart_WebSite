@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Shop.Logic.Services;
 
 namespace Shop.Api.Controllers
 {
@@ -7,5 +8,27 @@ namespace Shop.Api.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
+        private readonly IUserService _userService;
+
+        public UserController(IUserService userService)
+        {
+            _userService = userService;
+        }
+
+        [HttpGet]
+        [Route("GetCategories")]
+        public IActionResult GetCategories()
+        {
+            var data = _userService.GetCategories();
+            return Ok(data);
+        }
+
+        [HttpGet]
+        [Route("GetProductByCategoryId")]
+        public IActionResult GetProductByCategoryId(int categoryId)
+        {
+            var data = _userService.GetProductByCategoryId(categoryId);
+            return Ok(data);
+        }
     }
 }

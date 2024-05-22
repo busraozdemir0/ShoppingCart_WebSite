@@ -10,7 +10,7 @@ builder.Services.AddServerSideBlazor();
 
 builder.Services.AddHttpClient<IAdminPanelService, AdminPanelService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5265/");
+    client.BaseAddress = new Uri("http://localhost:5265/"); // Api'nin calistigi url (api bazli proje oldugu icin)
 });
 
 var app = builder.Build();

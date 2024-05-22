@@ -8,3 +8,12 @@
 @using Microsoft.JSInterop
 @using Shop.Web
 @using Shop.Web.Shared
+
+@inject NavigationManager navManager;
+@using Shop.DataModels.CustomModels;
+
+@using Shop.Web.Services
+@inject IUserPanelService userPanelService;
+
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedSessionStorage sessionStorage;
