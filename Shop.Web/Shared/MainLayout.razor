@@ -1,5 +1,10 @@
 ﻿@inherits LayoutComponentBase
 
+@using Shop.DataModels.CustomModels;
+@using Shop.Web.Services;
+@inject IUserPanelService userPanelService
+@inject ProtectedSessionStorage sessionStorage;
+@inject NavigationManager navManager;
 
 <style>
     .mainlayout {
@@ -134,7 +139,9 @@
         </div>
     </div>
     <div>
-        @Body
+        <CascadingValue Value="event_notify">
+            @Body
+        </CascadingValue>
     </div>
     <div class="footer">
         &copy; @DateTime.Now.Year - Shopping Cart Application
@@ -143,8 +150,62 @@
 
 @code {
     public int cartCount = 0;
+    public int layoutState = 0;
+
     public bool IsUserLoggedIn = false;
     public string LoggedInUserName = "User";
+    public List<CartModel> myCart { get; set; }
+
+    EventCallback event_notify => EventCallback.Factory.Create(this, NotifyLayout);
+
+    private async Task NotifyLayout()
+    {
+        // IsUserLoggedIn = await userPanelService.IsUserLoggedIn();
+
+        // if (IsUserLoggedIn && layoutState == 0)
+        // {
+        //     var userNameSession = await sessionStorage.GetAsync<string>("userName");
+        //     LoggedInUserName = userNameSession.Value;
+
+        //     var checkoutSession = await sessionStorage.GetAsync<string>("checkoutAlert");
+        //     if (checkoutSession.Success)
+        //     {
+        //         await sessionStorage.DeleteAsync("checkoutAlert");
+        //         navManager.NavigateTo("/mycart");
+        //     }
+
+        //     StateHasChanged();
+        //     layoutState++;
+        // }
+
+        if (layoutState == -1)
+        {
+            StateHasChanged();
+        }
+        var result = await sessionStorage.GetAsync<List<CartModel>>("myCart");
+
+        if (result.Success)
+        {
+            myCart = result.Value;
+            cartCount = myCart.Count;
+            await sessionStorage.DeleteAsync("updateCartFlag");
+            StateHasChanged();
+        }
+        else
+        {
+            cartCount = 0;
+        }
+
+    }
+
+    // Bu islem ile sayfa yenilense bile sepet uzerindeki rakam sepete eklenen urun sayisi olarak kalacak ve sifirlanmayacaktir.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await NotifyLayout();
+        }
+    }
 
     private void Logout()
     {

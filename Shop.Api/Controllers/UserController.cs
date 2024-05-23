@@ -27,8 +27,9 @@ namespace Shop.Api.Controllers
         [Route("GetProductByCategoryId")]
         public IActionResult GetProductByCategoryId(int categoryId)
         {
-            var data = _userService.GetProductByCategoryId(categoryId);
+            var data = _userService.GetProductByCategoryId(categoryId).Result; // Burada async metotlari senkron olarak bekletmeyiyoruz.
             return Ok(data);
         }
+
     }
 }

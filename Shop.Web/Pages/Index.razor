@@ -122,6 +122,11 @@
     public List<CategoryModel> categories { get; set; }
     public List<ProductModel> products { get; set; }
     public string categoryName = string.Empty;
+    public bool cartFlag = false;
+    public List<CartModel> myCart { get; set; }
+
+    [CascadingParameter]
+    public EventCallback notify { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -133,18 +138,121 @@
         categories = await userPanelService.GetCategories();
         if (categories != null && categories.Count > 0)
         {
-            await LoadProductByCategory(categories.FirstOrDefault());
+            await LoadProductByCategory(categories.FirstOrDefault()); // kategori listesinden ilkini Kategoriye gore urun listeleme metoduna gonder.
         }
     }
 
+    // Kategoriye gore urunleri listeleme
     private async Task LoadProductByCategory(CategoryModel category)
     {
         categoryName = category.Name;
         products = await userPanelService.GetProductByCategoryId(category.Id);
+        if (products != null && products.Count > 0)
+        {
+            await updateCartText(); // Sepete urun eklendiginde sepet uzerindeki rakamin artmasi icin
+        }
     }
 
-    private async Task AddToCart_Click(ProductModel productClicked)
+    // Sepete ekleme islemi
+    private async Task AddToCart_Click(ProductModel productClicked) // sepete ekle butonuna basilan urun geliyor
     {
+        cartFlag = true;
+        var result = await sessionStorage.GetAsync<List<CartModel>>("myCart");
 
+        if (!result.Success)
+        {
+            myCart = new List<CartModel>();
+
+            if (productClicked.CartFlag == true)
+            {
+                var existing_product = myCart.Where(x => x.ProductId == productClicked.Id).FirstOrDefault();
+                if (existing_product != null)
+                {
+                    myCart.Remove(existing_product);
+                    await sessionStorage.SetAsync("myCart", myCart);
+                }
+            }
+            else
+            {
+                CartModel cm = new CartModel();
+                cm.ProductId = productClicked.Id;
+                cm.Quantity = 1;
+                cm.AvailableStock = Convert.ToInt32(productClicked.Stock);
+                cm.ProductName = productClicked.Name;
+                cm.ProductImage = productClicked.ImageUrl;
+                cm.Price = Convert.ToInt32(productClicked.Price);
+                myCart.Add(cm);
+
+                await sessionStorage.SetAsync("myCart", myCart);
+
+            }
+        }
+        else
+        {
+            myCart = result.Value;
+
+            if (productClicked.CartFlag == true)
+            {
+                var existing_product = myCart.Where(x => x.ProductId == productClicked.Id).FirstOrDefault();
+                if (existing_product != null)
+                {
+                    myCart.Remove(existing_product);
+                    await sessionStorage.SetAsync("myCart", myCart);
+                }
+            }
+            else
+            {
+                CartModel cm = new CartModel();
+                cm.ProductId = productClicked.Id;
+                cm.Quantity = 1;
+                cm.AvailableStock = Convert.ToInt32(productClicked.Stock);
+                cm.ProductName = productClicked.Name;
+                cm.ProductImage = productClicked.ImageUrl;
+                cm.Price = Convert.ToInt32(productClicked.Price);
+                myCart.Add(cm);
+
+                await sessionStorage.SetAsync("myCart", myCart);
+            }
+        }
+
+        await updateCartText();
+        await notify.InvokeAsync();
+    }
+
+    // Sepete urun eklendikce sepet uzerindeki sayinin artmasi
+    private async Task updateCartText()
+    {
+        if (cartFlag)
+        {
+            var result = await sessionStorage.GetAsync<List<CartModel>>("myCart");
+            if (result.Success)
+            {
+                foreach (var _product in products)
+                {
+                    _product.CartFlag = false;
+                }
+                myCart = result.Value;
+                foreach (var cart in myCart)
+                {
+                    var cartProd = products.Where(x => x.Id == cart.ProductId).FirstOrDefault();
+                    if (cartProd != null)
+                    {
+                        cartProd.CartFlag = true;
+                    }
+                }
+            }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var result = await sessionStorage.GetAsync<List<CartModel>>("myCart");
+            if (result.Success)
+            {
+                cartFlag = true;
+            }
+        }
     }
 }
