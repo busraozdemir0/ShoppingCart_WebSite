@@ -11,5 +11,7 @@ namespace Shop.Logic.Services
     {
         List<CategoryModel> GetCategories();
         Task<List<ProductModel>> GetProductByCategoryId(int categoryId);
+        ResponseModel RegisterUser(RegisterModel registerModel); // Ana sayfa uzerinden kayit olan kullanicilar
+        ResponseModel LoginUser(LoginModel loginModel);
     }
 }

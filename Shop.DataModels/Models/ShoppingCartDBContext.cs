@@ -18,6 +18,7 @@ namespace Shop.DataModels.Models
 
         public virtual DbSet<AdminInfo> AdminInfos { get; set; } = null!;
         public virtual DbSet<Category> Categories { get; set; } = null!;
+        public virtual DbSet<Customer> Customers { get; set; } = null!;
         public virtual DbSet<Product> Products { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -59,6 +60,25 @@ namespace Shop.DataModels.Models
                 entity.Property(e => e.Name)
                     .HasMaxLength(100)
                     .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<Customer>(entity =>
+            {
+                entity.ToTable("Customer");
+
+                entity.Property(e => e.CreatedOn).HasMaxLength(25);
+
+                entity.Property(e => e.Email).HasMaxLength(30);
+
+                entity.Property(e => e.LastLogin).HasMaxLength(25);
+
+                entity.Property(e => e.MobileNo).HasMaxLength(10);
+
+                entity.Property(e => e.Name).HasMaxLength(100);
+
+                entity.Property(e => e.Password).HasMaxLength(6);
+
+                entity.Property(e => e.UpdatedOn).HasMaxLength(25);
             });
 
             modelBuilder.Entity<Product>(entity =>

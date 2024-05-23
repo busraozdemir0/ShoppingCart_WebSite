@@ -1,4 +1,5 @@
-﻿using Shop.DataModels.CustomModels;
+﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Shop.DataModels.CustomModels;
 using System.Text.Json;
 
 namespace Shop.Web.Services
@@ -6,22 +7,29 @@ namespace Shop.Web.Services
     public class UserPanelService : IUserPanelService
     {
         private readonly HttpClient _httpClient;
+        private readonly ProtectedSessionStorage _sessionStorage;
 
-        public UserPanelService(HttpClient httpClient)
+        public UserPanelService(HttpClient httpClient, ProtectedSessionStorage sessionStorage)
         {
             _httpClient = httpClient;
+            _sessionStorage = sessionStorage;
+        }
+
+        public async Task<bool> IsUserLoggedIn()
+        {
+            bool flag = false;
+            var result = await _sessionStorage.GetAsync<string>("userKey");
+            if (result.Success)
+            {
+                flag = true;
+            }
+            return flag;
         }
 
         public async Task<List<CategoryModel>> GetCategories()
         {
             return await _httpClient.GetFromJsonAsync<List<CategoryModel>>("api/User/GetCategories");
         }
-
-        //public async Task<List<ProductModel>> GetProductByCategoryId(int categoryId)
-        //{
-        //    return await _httpClient.GetFromJsonAsync<List<ProductModel>>("api/User/GetProductByCategoryId/?categoryId=" + categoryId);
-
-        //}
         public async Task<List<ProductModel>> GetProductByCategoryId(int categoryId)
         {
             try
@@ -34,6 +42,19 @@ namespace Shop.Web.Services
                 Console.WriteLine($"Hata: {ex.Message}");
                 return new List<ProductModel>();
             }
+        }
+
+        public async Task<ResponseModel> RegisterUser(RegisterModel registerModel)
+        {
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/User/RegisterUser", registerModel);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"HTTP Status: {response.StatusCode}, Content: {errorContent}");
+            }
+
+            return await response.Content.ReadFromJsonAsync<ResponseModel>();
         }
 
     }

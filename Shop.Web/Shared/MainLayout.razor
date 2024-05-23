@@ -160,23 +160,23 @@
 
     private async Task NotifyLayout()
     {
-        // IsUserLoggedIn = await userPanelService.IsUserLoggedIn();
+        IsUserLoggedIn = await userPanelService.IsUserLoggedIn();
 
-        // if (IsUserLoggedIn && layoutState == 0)
-        // {
-        //     var userNameSession = await sessionStorage.GetAsync<string>("userName");
-        //     LoggedInUserName = userNameSession.Value;
+        if (IsUserLoggedIn && layoutState == 0)
+        {
+            var userNameSession = await sessionStorage.GetAsync<string>("userName");
+            LoggedInUserName = userNameSession.Value;
 
-        //     var checkoutSession = await sessionStorage.GetAsync<string>("checkoutAlert");
-        //     if (checkoutSession.Success)
-        //     {
-        //         await sessionStorage.DeleteAsync("checkoutAlert");
-        //         navManager.NavigateTo("/mycart");
-        //     }
+            var checkoutSession = await sessionStorage.GetAsync<string>("checkoutAlert");
+            if (checkoutSession.Success)
+            {
+                await sessionStorage.DeleteAsync("checkoutAlert");
+                navManager.NavigateTo("/mycart");
+            }
 
-        //     StateHasChanged();
-        //     layoutState++;
-        // }
+            StateHasChanged();
+            layoutState++;
+        }
 
         if (layoutState == -1)
         {
@@ -207,8 +207,13 @@
         }
     }
 
-    private void Logout()
+    private async void Logout()
     {
-
+        await sessionStorage.DeleteAsync("userKey");
+        await sessionStorage.DeleteAsync("userName");
+        await sessionStorage.DeleteAsync("userEmail");
+        await NotifyLayout();
+        navManager.NavigateTo("/");
+        layoutState = -1;
     }
 }

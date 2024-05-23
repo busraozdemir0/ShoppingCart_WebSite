@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Shop.DataModels.CustomModels;
 using Shop.Logic.Services;
 
 namespace Shop.Api.Controllers
@@ -28,6 +29,14 @@ namespace Shop.Api.Controllers
         public IActionResult GetProductByCategoryId(int categoryId)
         {
             var data = _userService.GetProductByCategoryId(categoryId).Result; // Burada async metotlari senkron olarak bekletmeyiyoruz.
+            return Ok(data);
+        }
+
+        [HttpPost]
+        [Route("RegisterUser")]
+        public IActionResult RegisterUser(RegisterModel registerModel)
+        {
+            var data = _userService.RegisterUser(registerModel);
             return Ok(data);
         }
 
