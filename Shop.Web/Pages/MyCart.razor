@@ -1,7 +1,219 @@
 ﻿@page "/mycart"
 
-<h3>MyCart</h3>
+
+<style>
+    .small-container {
+        max-width: 1080px;
+        margin: auto;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .cart-page {
+        margin: 20px auto;
+    }
+
+    table {
+        width: 100%;
+        border-colapse: collapse;
+    }
+
+    .cart-info {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    th {
+        text-align: left;
+        padding: 5px;
+        color: #ffffff;
+        background: #808080;
+        font-weight: normal;
+    }
+
+    td {
+        padding: 10px 5px;
+    }
+
+        td input {
+            width: 40px;
+            height: 30px;
+            padding: 5px;
+        }
+
+        td a {
+            color: #ff523b;
+            font-size: 12px;
+        }
+
+        td img {
+            width: 80px;
+            height: 80px;
+            margin-right: 10px;
+        }
+
+    .total-price {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+        .total-price table {
+            border-top: 3px solid #ff523b;
+            width: 100%;
+            max-width: 400px;
+        }
+
+    td:last-child {
+        text-align: right;
+    }
+
+    th:last-child {
+        text-align: right;
+    }
+
+</style>
+
+
+<div class="small-container cart-page">
+    @if (myCart != null && myCart.Count > 0)
+    {
+        <table>
+            <tr>
+                <th>Product</th>
+                <th>Remove</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+            </tr>
+            @foreach (var cart in myCart)
+            {
+                <tr>
+                    <td>
+                        <div class="cart-info">
+                            <img src="http://localhost:5265/@cart.ProductImage" alt="Product Photo" />
+                            <div>
+                                <p>@cart.ProductName</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td><a @onclick="(()=> RemoveFromCart_Click(cart))" style="cursor:pointer;">Remove</a></td>
+                    <td>@cart.Price</td>
+                    @* Urun miktarini arttirmak icin kucuk input (urun miktari en fazla mevcut stok sayisi kadar olabilir) *@
+                    <td><input type="number" @bind="cart.Quantity" min="1" max="@cart.AvailableStock" @onclick="@onQuantityChange" style="width:60px;"/></td>
+                    <td>$@(cart.Price*cart.Quantity).00</td>
+                </tr>
+            }
+        </table>
+
+        <div class="total-price">
+            <table>
+                <tr>
+                    <td>Subtotal</td>
+                    <td>$@subTotal.00</td>
+                </tr>
+                <tr>
+                    <td>Shipping Charges</td>
+                    <td>$@shippingCharges.00</td>
+                </tr>
+                <tr>
+                    <td>Shipping Address</td>
+                    <td>
+                        <textarea rows="3" cols="30" name="shippingaddress" placeholder="Shipping Address"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Payment Mode</td>
+                    <td>@paymentMode</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><button type="button" value="Checkout" class="btn btn-primary" @onclick="@Checkout_Click"> Checkout</button></td>
+                </tr>
+            </table>
+        </div>
+    }
+    else @* Eger sepete hic urun eklenmemisse Your cart is empty yazili gorsel ekrana yerlestiriliyor. *@
+    {
+        <hr />
+        <div style="text-align:center;">
+            <img src="./images/empty_cart.png" style="width:40em;" />
+        </div>
+    }
+</div>
+
+
 
 @code {
+    public List<CartModel> myCart { get; set; }
+
+    public string shippingAddress { get; set; }
+    public string paymentMode { get; set; }
+    public int subTotal { get; set; }
+    public string userName { get; set; }
+    public string userEmail { get; set; }
+    public int shippingCharges { get; set; }
+    public int finalTotal { get; set; }
+
+    [CascadingParameter]
+    public EventCallback notify { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        shippingCharges = 5;
+        subTotal = 0;
+        paymentMode = "Cash on Delivery"; // Odeme modu= kapida odeme
+
+        return base.OnInitializedAsync();
+    }
+
+    private async Task RemoveFromCart_Click(CartModel cartItem)
+    {
+        myCart.Remove(cartItem);
+        await sessionStorage.SetAsync("myCart", myCart);
+        onQuantityChange();
+
+        await notify.InvokeAsync();
+    }
+
+    // Urun miktari arttikca urun fiyati guncel urun miktari kadar tekrar hesaplanip en sondaki toplamda tekrar hesaplanarak guncelleniyor.
+    private void onQuantityChange()
+    {
+        finalTotal = 0;
+        subTotal = 0;
+        foreach(var cart_item in myCart)
+        {
+            subTotal = subTotal + (cart_item.Price * cart_item.Quantity);
+        }
+        finalTotal = subTotal + shippingCharges;
+    }
+
+    private async Task Checkout_Click()
+    {
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var result = await sessionStorage.GetAsync<List<CartModel>>("myCart");
+            if (result.Success)
+            {
+                myCart = result.Value;
+                foreach (var cart_item in myCart)
+                {
+                    // Urunun fiyatini eklenen miktar kadar belirleme
+                    subTotal = subTotal + (cart_item.Price * cart_item.Quantity);
+                }
+                if (myCart != null && myCart.Count > 0)
+                {
+                    shippingAddress = myCart.FirstOrDefault().ShippingAddress;
+                }
+            }
+            finalTotal = subTotal + shippingCharges; // Urun toplami + kargo ucreti
+
+            StateHasChanged(); // Guncellemenin kullanici arayuzune hemen yansimasini saglamak icin kullanilir. (Sepete ekleme isleminde urunun sepete hemen yansimasi icin)
+        }
+    }
 
 }
