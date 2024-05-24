@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using Shop.DataModels.CustomModels;
 using Shop.DataModels.Models;
+using Stripe;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,7 +61,7 @@ namespace Shop.Logic.Services
 
                 if (!exist_check) // Eger kaydolmamissa
                 {
-                    Customer _customer = new Customer();
+                    Shop.DataModels.Models.Customer _customer = new Shop.DataModels.Models.Customer();
                     _customer.Name = registerModel.Name;
                     _customer.MobileNo = registerModel.MobileNo;
                     _customer.Email = registerModel.EmailId;
@@ -270,6 +271,69 @@ namespace Shop.Logic.Services
                 shipping_status = order.ShippingStatus.Split("|").ToList();
             }
             return shipping_status;
+        }
+
+        // Kartla odeme yontemi (Kredi karti bilgislerini dogrusan apiye gondermek guvenli olmadigi icin tam calismiyor)
+        public async Task<string> MakePaymentStripe(string cardNumber, int expMonth, int expYear, string cvc, decimal value)
+        {
+            // http://localhost:5265/api/User/CheckoutStripe/?cardNumber=4242424242424242&expMonth=05&expYear=24&cvc=123&value=5
+            try
+            {
+                // Asagidaki satirda yer alan ApiKey https://dashboard.stripe.com/apikeys sitesinden olusturulmustur.
+                StripeConfiguration.ApiKey = "...";
+                var optionToken = new TokenCreateOptions
+                {
+                    Card = new TokenCardOptions
+                    {
+                        Number = cardNumber,
+                        ExpMonth = expMonth.ToString(),
+                        ExpYear = expYear.ToString(),
+                        Cvc = cvc
+                    }
+                };
+
+                var serviceToken = new TokenService();
+                Token stripeToken = await serviceToken.CreateAsync(optionToken);
+
+                var customer = new Stripe.Customer
+                {
+                    Name = "Büşra",
+                    Address = new Address
+                    {
+                        Country = "Turkey",
+                        City = "Duzce",
+                        Line1 = "59 - Center, Duzce",
+                        PostalCode = "81100",
+                    }
+                };
+
+                var options = new ChargeCreateOptions()
+                {
+                    Amount = (long)(value * 100), // Kuruş cinsinden
+                    Currency = "usd", // "ABD" yerine "usd" kullanın
+                    Description = "Test",
+                    Source = stripeToken.Id,
+
+                };
+
+                var service = new ChargeService();
+                Charge charge=await service.CreateAsync(options);
+
+                if (charge.Paid)
+                {
+                    return "Success";
+                }
+                else
+                {
+                    return "Fail";
+                }
+
+                
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
     }

@@ -88,5 +88,12 @@ namespace Shop.Api.Controllers
             return Ok(data);
         }
 
+        [HttpGet]
+        [Route("CheckoutStripe")]
+        public IActionResult CheckoutStripe(string cardNumber, int expMonth, int expYear, string cvc, decimal value)
+        {
+            var data = _userService.MakePaymentStripe(cardNumber,expMonth,expYear,cvc,value);
+            return Ok(data);
+        }
     }
 }

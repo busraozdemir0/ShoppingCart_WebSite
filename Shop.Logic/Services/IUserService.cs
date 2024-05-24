@@ -19,5 +19,6 @@ namespace Shop.Logic.Services
         List<CartModel> GetOrderDetailForCustomer(int customerId, string order_number);
         ResponseModel ChangePassword(PasswordModel passwordModel);
         List<string> GetShippingStatusForOrder(string order_number);
+        Task<string> MakePaymentStripe(string cardNumber, int expMonth, int expYear, string cvc, decimal value); // Kartla Stripe yontemi ile odeme
     }
 }
