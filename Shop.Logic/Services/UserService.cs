@@ -158,10 +158,10 @@ namespace Shop.Logic.Services
                     _orderDetail.OrderId = OrderId;
                     _orderDetail.ProductId = items.ProductId;
                     _orderDetail.Quantity = items.Quantity;
-                    _orderDetail.Price= items.Price;
+                    _orderDetail.Price = items.Price;
                     _orderDetail.SubTotal = items.Price * items.Quantity;
-                    _orderDetail.CreatedOn= DateTime.Now.ToString("dd/MM/yyyy"); // Siparisin olusturuldugu tarih
-                    _orderDetail.UpdatedOn= DateTime.Now.ToString("dd/MM/yyyy");
+                    _orderDetail.CreatedOn = DateTime.Now.ToString("dd/MM/yyyy"); // Siparisin olusturuldugu tarih
+                    _orderDetail.UpdatedOn = DateTime.Now.ToString("dd/MM/yyyy");
                     _dbContext.OrderDetails.Add(_orderDetail);
 
                     // Siparisi verilen urunun stok miktarindan urunun siparis verildigi miktar kadarini eksiltme ve guncelleme islemi.
@@ -198,5 +198,79 @@ namespace Shop.Logic.Services
             }
             return OrderId;
         }
+
+        // Giris yapan kisinin vermis oldugu tum siparisler Id'ye gore azalan bicimde listeleniyor.
+        public List<CustomerOrder> GetOrdersByCustomerId(int customerId)
+        {
+            var _customerOrders = _dbContext.CustomerOrders.Where(x => x.CustomerId == customerId).OrderByDescending(x => x.Id).ToList();
+            return _customerOrders;
+        }
+
+        public List<CartModel> GetOrderDetailForCustomer(int customerId, string order_number)
+        {
+            List<CartModel> cart_details = new List<CartModel>();
+
+            // Giren kisinin id'si ve siparisin id'si esit olan tum musteri siparislerini listele
+            var customer_order = _dbContext.CustomerOrders.Where(x => x.CustomerId == customerId && x.OrderId == order_number).FirstOrDefault();
+
+            if (customer_order != null)
+            {
+                var order_detail = _dbContext.OrderDetails.Where(x => x.OrderId == order_number).ToList();
+                var product_list = _dbContext.Products.ToList(); // Tum urun listesi
+
+                foreach (var order in order_detail)
+                {
+                    // tum urunler arasindan id'si siparisteki ProductId'ye esit olani getir
+                    var prod = product_list.Where(x => x.Id == order.ProductId).FirstOrDefault();
+                    CartModel _cartModel = new CartModel();
+                    _cartModel.ProductName = prod.Name;
+                    _cartModel.Price = Convert.ToInt32(order.Price);
+                    _cartModel.ProductImage = prod.ImageUrl;
+                    _cartModel.Quantity = Convert.ToInt32(order.Quantity);
+                    cart_details.Add(_cartModel);
+                }
+
+                cart_details.FirstOrDefault().ShippingAddress = customer_order.ShippingAddress; // musterinin siparisindeki siparis adresini cart_details'teki ilk ogesine atadik.
+                cart_details.FirstOrDefault().ShippingCharges = Convert.ToInt32(customer_order.ShippingCharges);
+                cart_details.FirstOrDefault().SubTotal = Convert.ToInt32(customer_order.SubTotal);
+                cart_details.FirstOrDefault().Total = Convert.ToInt32(customer_order.Total);
+                cart_details.FirstOrDefault().PaymentMode = customer_order.PaymentMode;
+            }
+            return cart_details;
+        }
+
+        public ResponseModel ChangePassword(PasswordModel passwordModel)
+        {
+            ResponseModel response = new ResponseModel();
+            response.Status = true;
+
+            var _customer = _dbContext.Customers.Where(x => x.Id == passwordModel.UserKey).FirstOrDefault(); // Giris yapan kisinin key bilgisine esit olar Customer'i cektik.
+            if (_customer != null)
+            {
+                _customer.Password = passwordModel.Password;
+                _dbContext.Customers.Update(_customer);
+                _dbContext.SaveChanges();
+
+                response.Message = "Password updated successfully.";
+            }
+            else
+            {
+                response.Message = "User does not exist. Try again!";
+            }
+            return response;
+        }
+
+        // Verilen siparis numarasina gore siparisin gonderim durumunu liste olarak dondurur.
+        public List<string> GetShippingStatusForOrder(string order_number)
+        {
+            List<string> shipping_status = new List<string>();
+            var order = _dbContext.CustomerOrders.Where(x => x.OrderId == order_number).FirstOrDefault();
+            if (order != null && order.ShippingStatus != null)
+            {
+                shipping_status = order.ShippingStatus.Split("|").ToList();
+            }
+            return shipping_status;
+        }
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Shop.DataModels.CustomModels;
+using Shop.DataModels.Models;
 using System.Text.Json;
 
 namespace Shop.Web.Services
@@ -69,7 +70,7 @@ namespace Shop.Web.Services
 
             return await response.Content.ReadFromJsonAsync<ResponseModel>();
         }
-         
+
         // Siparisi verme islemi
         public async Task<ResponseModel> Checkout(List<CartModel> cartItems)
         {
@@ -84,5 +85,32 @@ namespace Shop.Web.Services
             return await response.Content.ReadFromJsonAsync<ResponseModel>();
         }
 
+        // Giren kullanicinin id'sine gore siparisleri getir
+        public async Task<List<CustomerOrder>> GetOrdersByCustomerId(int customerId)
+        {
+            return await _httpClient.GetFromJsonAsync<List<CustomerOrder>>("api/User/GetOrdersByCustomerId/?customerId=" + customerId);
+        }
+
+        public async Task<List<CartModel>> GetOrderDetailForCustomer(int customerId, string order_number)
+        {
+            return await _httpClient.GetFromJsonAsync<List<CartModel>>("api/User/GetOrderDetailForCustomer/?customerId=" + customerId + "&order_number=" + order_number);
+        }
+        public async Task<List<string>> GetShippingStatusForOrder(string order_number)
+        {
+            return await _httpClient.GetFromJsonAsync<List<string>>("api/User/GetShippingStatusForOrder/?order_number=" + order_number);
+        }
+
+        public async Task<ResponseModel> ChangePassword(PasswordModel passwordModel)
+        {
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/User/ChangePassword", passwordModel);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"HTTP Status: {response.StatusCode}, Content: {errorContent}");
+            }
+
+            return await response.Content.ReadFromJsonAsync<ResponseModel>();
+        }
     }
 }

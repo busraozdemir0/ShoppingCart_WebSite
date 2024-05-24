@@ -1,4 +1,5 @@
 ﻿using Shop.DataModels.CustomModels;
+using Shop.DataModels.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,5 +15,9 @@ namespace Shop.Logic.Services
         ResponseModel RegisterUser(RegisterModel registerModel); // Ana sayfa uzerinden kayit olan kullanicilar
         ResponseModel LoginUser(LoginModel loginModel);
         ResponseModel Checkout(List<CartModel> cartItems); // Siparis verme islemleri
+        List<CustomerOrder> GetOrdersByCustomerId(int customerId);
+        List<CartModel> GetOrderDetailForCustomer(int customerId, string order_number);
+        ResponseModel ChangePassword(PasswordModel passwordModel);
+        List<string> GetShippingStatusForOrder(string order_number);
     }
 }
