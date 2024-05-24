@@ -69,6 +69,20 @@ namespace Shop.Web.Services
 
             return await response.Content.ReadFromJsonAsync<ResponseModel>();
         }
+         
+        // Siparisi verme islemi
+        public async Task<ResponseModel> Checkout(List<CartModel> cartItems)
+        {
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/User/Checkout", cartItems);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"HTTP Status: {response.StatusCode}, Content: {errorContent}");
+            }
+
+            return await response.Content.ReadFromJsonAsync<ResponseModel>();
+        }
 
     }
 }

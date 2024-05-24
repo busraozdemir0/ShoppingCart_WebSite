@@ -18,7 +18,7 @@ namespace Shop.DataModels.CustomModels
         public int ShippingCharges { get; set; } // Kargo ucreti
         public int SubTotal { get; set; }
         public int Total { get; set; }
-        public string ShippingAddress { get; set; }
-        public string PaymentMode { get; set; }
+        public string? ShippingAddress { get; set; }
+        public string? PaymentMode { get; set; }
     }
 }

@@ -13,5 +13,6 @@ namespace Shop.Logic.Services
         Task<List<ProductModel>> GetProductByCategoryId(int categoryId);
         ResponseModel RegisterUser(RegisterModel registerModel); // Ana sayfa uzerinden kayit olan kullanicilar
         ResponseModel LoginUser(LoginModel loginModel);
+        ResponseModel Checkout(List<CartModel> cartItems); // Siparis verme islemleri
     }
 }

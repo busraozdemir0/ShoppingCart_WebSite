@@ -19,6 +19,8 @@ namespace Shop.DataModels.Models
         public virtual DbSet<AdminInfo> AdminInfos { get; set; } = null!;
         public virtual DbSet<Category> Categories { get; set; } = null!;
         public virtual DbSet<Customer> Customers { get; set; } = null!;
+        public virtual DbSet<CustomerOrder> CustomerOrders { get; set; } = null!;
+        public virtual DbSet<OrderDetail> OrderDetails { get; set; } = null!;
         public virtual DbSet<Product> Products { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -77,6 +79,32 @@ namespace Shop.DataModels.Models
                 entity.Property(e => e.Name).HasMaxLength(100);
 
                 entity.Property(e => e.Password).HasMaxLength(6);
+
+                entity.Property(e => e.UpdatedOn).HasMaxLength(25);
+            });
+
+            modelBuilder.Entity<CustomerOrder>(entity =>
+            {
+                entity.ToTable("CustomerOrder");
+
+                entity.Property(e => e.CreatedOn).HasMaxLength(25);
+
+                entity.Property(e => e.OrderId).HasMaxLength(9);
+
+                entity.Property(e => e.PaymentMode).HasMaxLength(50);
+
+                entity.Property(e => e.ShippingAddress).HasMaxLength(200);
+
+                entity.Property(e => e.UpdatedOn).HasMaxLength(25);
+            });
+
+            modelBuilder.Entity<OrderDetail>(entity =>
+            {
+                entity.ToTable("OrderDetail");
+
+                entity.Property(e => e.CreatedOn).HasMaxLength(25);
+
+                entity.Property(e => e.OrderId).HasMaxLength(9);
 
                 entity.Property(e => e.UpdatedOn).HasMaxLength(25);
             });

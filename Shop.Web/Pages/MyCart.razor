@@ -140,7 +140,7 @@
                 <tr>
                     <td>Shipping Address</td>
                     <td>
-                        <textarea rows="3" cols="30" name="shippingaddress" placeholder="Shipping Address"></textarea>
+                        <textarea rows="3" cols="30" name="shippingaddress" @bind="@shippingAddress" placeholder="Shipping Address"></textarea>
                     </td>
                 </tr>
                 <tr>
@@ -171,10 +171,12 @@
     public string shippingAddress { get; set; }
     public string paymentMode { get; set; }
     public int subTotal { get; set; }
-    public string userName { get; set; }
-    public string userEmail { get; set; }
     public int shippingCharges { get; set; }
     public int finalTotal { get; set; }
+
+    public string userName { get; set; }
+    public string userEmail { get; set; }
+    public bool IsUserLoggedIn = false;
 
     [CascadingParameter]
     public EventCallback notify { get; set; }
@@ -211,7 +213,41 @@
 
     private async Task Checkout_Click()
     {
+        if(myCart != null && myCart.Count > 0)
+        {
+            myCart.FirstOrDefault().ShippingAddress = shippingAddress;
+            myCart.FirstOrDefault().ShippingCharges = shippingCharges;
+            myCart.FirstOrDefault().SubTotal = subTotal;
+            myCart.FirstOrDefault().PaymentMode = paymentMode;
 
+            var session_userKey = await sessionStorage.GetAsync<string>("userKey");
+            if (session_userKey.Success)
+            {
+                myCart.FirstOrDefault().UserId = Convert.ToInt32(session_userKey.Value);
+            }
+
+            await sessionStorage.SetAsync("myCart", myCart);
+
+            IsUserLoggedIn = await userPanelService.IsUserLoggedIn();
+            if (IsUserLoggedIn)
+            {
+                var response = await userPanelService.Checkout(myCart);
+                if(response != null)
+                {
+                    myCart.Clear();
+                    await sessionStorage.SetAsync("myCart", myCart);
+                    await sessionStorage.SetAsync("latestOrder",response.Message);
+                    await notify.InvokeAsync();
+                    navManager.NavigateTo("myaccount");
+                }
+            }
+            else // Siparis verimi sirasinda eger kullanici giris yapmamissa giris sayfasina yonlendiriliyor.
+            {
+                await sessionStorage.SetAsync("checkoutAlert","** Note : Login / Register to place your order!");
+                navManager.NavigateTo("login");
+            }
+
+        }
     }
 
     // Sepet sayfasinin ustundeki Clear butonuna basildiginde sepetteki tum urunlerin silinmesi saglaniyor.

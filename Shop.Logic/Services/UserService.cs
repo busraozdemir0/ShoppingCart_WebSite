@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Shop.DataModels.CustomModels;
 using Shop.DataModels.Models;
 using System;
@@ -86,7 +87,7 @@ namespace Shop.Logic.Services
             {
                 response.Status = false;
                 response.Message = "An Error has occured. Please try again!";
-               
+
                 return response;
             }
         }
@@ -126,6 +127,76 @@ namespace Shop.Logic.Services
 
                 return response;
             }
+        }
+
+        // Siparis verme islemleri
+        public ResponseModel Checkout(List<CartModel> cartItems)
+        {
+            string OrderId = GenerateOrderId();
+            var prods = _dbContext.Products.ToList();
+
+            try
+            {
+                // Siparisi veren kullanicinin bilgilerini CustomerOrder tablosuna kaydetme
+                var detail = cartItems.FirstOrDefault();
+                CustomerOrder _customerOrder = new CustomerOrder();
+                _customerOrder.CustomerId = detail.UserId;
+                _customerOrder.OrderId = OrderId;
+                _customerOrder.PaymentMode = detail.PaymentMode;
+                _customerOrder.ShippingAddress = detail.ShippingAddress;
+                _customerOrder.ShippingCharges = detail.ShippingCharges; // Kargo ucreti
+                _customerOrder.SubTotal = detail.SubTotal;
+                _customerOrder.Total = detail.ShippingCharges + detail.SubTotal;
+                _customerOrder.CreatedOn = DateTime.Now.ToString("dd/MM/yyyy"); // Siparisin olusturuldugu tarih
+                _customerOrder.UpdatedOn = DateTime.Now.ToString("dd/MM/yyyy");
+                _dbContext.CustomerOrders.Add(_customerOrder);
+
+                // Siparis detaylarini OrderDetails tablosuna kaydetme
+                foreach (var items in cartItems) // sipariste kac tane urun varsa
+                {
+                    OrderDetail _orderDetail = new OrderDetail();
+                    _orderDetail.OrderId = OrderId;
+                    _orderDetail.ProductId = items.ProductId;
+                    _orderDetail.Quantity = items.Quantity;
+                    _orderDetail.Price= items.Price;
+                    _orderDetail.SubTotal = items.Price * items.Quantity;
+                    _orderDetail.CreatedOn= DateTime.Now.ToString("dd/MM/yyyy"); // Siparisin olusturuldugu tarih
+                    _orderDetail.UpdatedOn= DateTime.Now.ToString("dd/MM/yyyy");
+                    _dbContext.OrderDetails.Add(_orderDetail);
+
+                    // Siparisi verilen urunun stok miktarindan urunun siparis verildigi miktar kadarini eksiltme ve guncelleme islemi.
+                    var selected_product = prods.Where(x => x.Id == items.ProductId).FirstOrDefault();
+                    selected_product.Stock = selected_product.Stock - items.Quantity;
+                    _dbContext.Products.Update(selected_product);
+                }
+                _dbContext.SaveChanges();
+
+                ResponseModel response = new ResponseModel();
+                response.Message = OrderId;
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        // Siparis numarasi (OrderId) uretme islemi
+        private string GenerateOrderId()
+        {
+            string OrderId = string.Empty;
+            Random generator = null;
+            for (int i = 0; i < 1000; i++)
+            {
+                generator = new Random();
+                OrderId = "p" + generator.Next(1, 10000000).ToString("D8");
+                if (!_dbContext.CustomerOrders.Where(x => x.OrderId == OrderId).Any()) // Uretilen siparis no (OrderId) ile db'de eslesen kayit yoksa donguden cik. (Eger eslesen kayit varsa yeni bir numara uretilecek.)
+                {
+                    break;
+                }
+            }
+            return OrderId;
         }
     }
 }

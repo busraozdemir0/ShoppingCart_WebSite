@@ -48,5 +48,13 @@ namespace Shop.Api.Controllers
             return Ok(data);
         }
 
+        [HttpPost]
+        [Route("Checkout")]
+        public IActionResult Checkout(List<CartModel> cartItems) // Birden fazla urun siparisi verilebilme durumu oldguu icin CartModel sinifini Liste biciminde tanimladik.
+        {
+            var data = _userService.Checkout(cartItems);
+            return Ok(data);
+        }
+
     }
 }

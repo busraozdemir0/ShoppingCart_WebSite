@@ -9,5 +9,6 @@ namespace Shop.Web.Services
         Task<List<ProductModel>> GetProductByCategoryId(int categoryId);
         Task<ResponseModel> RegisterUser(RegisterModel registerModel);
         Task<ResponseModel> LoginUser(LoginModel loginModel);
+        Task<ResponseModel> Checkout(List<CartModel> cartItems);
     }
 }
