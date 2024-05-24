@@ -73,6 +73,28 @@
 
 </style>
 
+<div style="padding:10px 0px 0px 10px; text-align:right;">
+    
+    @* // Sepet sayfasinin ustunde giris yapan kullanicinin adi ve emaili gozukmesi icin *@
+    @if (@userName != null && userEmail != null)
+    {
+        <span>
+            <span style="border:1px ridge #ff523b; background-color:#ff6a00; border-radius: 10px; color: #ffffff; padding: 3px;"> My Cart </span>
+            &nbsp;&nbsp;
+            <b>
+                Name: @userName
+                    &nbsp;&nbsp;
+                Email: @userEmail
+                    &nbsp;&nbsp;
+            </b>
+        </span>
+    }
+    @* Sepette bir ya da birden fazla urun varsa sepetteki tum urunleri kaldirabilmek icin Clear butonu koyuldu. *@
+    @if (myCart != null && myCart.Count > 0)
+    {
+        <button type="button" calue="Clear" class="btn btn-primary" @onclick="@Clear_Click">Clear</button>
+    }
+</div>
 
 <div class="small-container cart-page">
     @if (myCart != null && myCart.Count > 0)
@@ -99,8 +121,8 @@
                     <td><a @onclick="(()=> RemoveFromCart_Click(cart))" style="cursor:pointer;">Remove</a></td>
                     <td>@cart.Price</td>
                     @* Urun miktarini arttirmak icin kucuk input (urun miktari en fazla mevcut stok sayisi kadar olabilir) *@
-                    <td><input type="number" @bind="cart.Quantity" min="1" max="@cart.AvailableStock" @onclick="@onQuantityChange" style="width:60px;"/></td>
-                    <td>$@(cart.Price*cart.Quantity).00</td>
+                    <td><input type="number" @bind="cart.Quantity" min="1" max="@cart.AvailableStock" @onclick="@onQuantityChange" style="width:60px;" /></td>
+                    <td>$@(cart.Price * cart.Quantity).00</td>
                 </tr>
             }
         </table>
@@ -180,7 +202,7 @@
     {
         finalTotal = 0;
         subTotal = 0;
-        foreach(var cart_item in myCart)
+        foreach (var cart_item in myCart)
         {
             subTotal = subTotal + (cart_item.Price * cart_item.Quantity);
         }
@@ -190,6 +212,14 @@
     private async Task Checkout_Click()
     {
 
+    }
+
+    // Sepet sayfasinin ustundeki Clear butonuna basildiginde sepetteki tum urunlerin silinmesi saglaniyor.
+    private async Task Clear_Click()
+    {
+        myCart = new List<CartModel>();
+        await sessionStorage.DeleteAsync("myCart");
+        await notify.InvokeAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -211,6 +241,15 @@
                 }
             }
             finalTotal = subTotal + shippingCharges; // Urun toplami + kargo ucreti
+
+            // Sepet sayfasinin ustunde giris yapan kullanicinin adi ve emaili gozukmesi icin
+            var session_userName = await sessionStorage.GetAsync<string>("userName");
+            var session_userEmail = await sessionStorage.GetAsync<string>("userEmail");
+            if(session_userName.Success && session_userEmail.Success)
+            {
+                userName = session_userName.Value;
+                userEmail = session_userEmail.Value;
+            }
 
             StateHasChanged(); // Guncellemenin kullanici arayuzune hemen yansimasini saglamak icin kullanilir. (Sepete ekleme isleminde urunun sepete hemen yansimasi icin)
         }

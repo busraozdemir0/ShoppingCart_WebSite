@@ -2,7 +2,11 @@
 
 <style>
     .loginBox {
-        font-family: ‘Open Sans', sans-serif; margin: 0 auto 0 auto; width: 100%; text-align: center; margin: 20px 0px 20px 0px;
+        font-family: 'Open Sans', sans-serif;
+        margin: 0 auto 0 auto;
+        width: 100%;
+        text-align: center;
+        margin: 20px 0px 20px 0px;
     }
 
     p {
@@ -54,7 +58,7 @@
         color: white;
         border-radius: 4px;
         border: #27ae60 1px solid;
-        margin-top: 2px;
+        margin-top: 20px;
         margin-bottom: 20px;
         float: left;
         margin-left: 16px;
@@ -88,27 +92,27 @@
 </style>
 
 <div style="min-height:550px;">
-    <div class="box">
-        <h1>Register</h1>
-        <EditForm Model="@registerModel" OnValidSubmit="Register_Click">
-            <DataAnnotationsValidator />
-            <InputText typeof="text" name="name" placeholder="Name" class="email" @bind-Value="registerModel.Name" autocomplete="off" />
-            <ValidationMessage For="@(()=> registerModel.Name)" />
-
-            <InputText typeof="email" name="email" placeholder="Email" class="email" @bind-Value="registerModel.EmailId" autocomplete="off" />
-            <ValidationMessage For="@(()=> registerModel.EmailId)" />
-
-            <InputText typeof="text" name="mobileno" placeholder="Mobile Number" class="email" @bind-Value="registerModel.MobileNo" autocomplete="off" />
-            <ValidationMessage For="@(()=> registerModel.MobileNo)" />
-
-            <InputText typeof="password" name="email" placeholder="Password" class="email" @bind-Value="registerModel.Password" autocomplete="off" />
-            <ValidationMessage For="@(()=> registerModel.Password)" />
-
-            <input type="submit" class="btn" value="Register" />
-            <a href="login"><div id="btn2">Login</div></a>
-        </EditForm>
-    </div>
     <div class="loginBox">
+        <div class="box">
+            <h1>Register</h1>
+            <EditForm Model="@registerModel" OnValidSubmit="Register_Click">
+                <DataAnnotationsValidator />
+                <InputText typeof="text" name="name" placeholder="Name" class="email" @bind-Value="registerModel.Name" autocomplete="off" />
+                <ValidationMessage For="@(()=> registerModel.Name)" />
+
+                <InputText typeof="email" name="email" placeholder="Email" class="email" @bind-Value="registerModel.EmailId" autocomplete="off" />
+                <ValidationMessage For="@(()=> registerModel.EmailId)" />
+
+                <InputText typeof="text" name="mobileno" placeholder="Mobile Number" class="email" @bind-Value="registerModel.MobileNo" autocomplete="off" />
+                <ValidationMessage For="@(()=> registerModel.MobileNo)" />
+
+                <InputText typeof="password" name="email" placeholder="Password" class="email" @bind-Value="registerModel.Password" autocomplete="off" />
+                <ValidationMessage For="@(()=> registerModel.Password)" />
+
+                <input type="submit" class="btn" value="Register" />
+                <a href="login"><div id="btn2">Login</div></a>
+            </EditForm>
+        </div>
         <div>
             <br /> <br />
             <p style="color:#e52e50">

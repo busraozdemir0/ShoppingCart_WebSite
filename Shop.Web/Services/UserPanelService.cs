@@ -57,5 +57,18 @@ namespace Shop.Web.Services
             return await response.Content.ReadFromJsonAsync<ResponseModel>();
         }
 
+        public async Task<ResponseModel> LoginUser(LoginModel loginModel)
+        {
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/User/LoginUser", loginModel);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"HTTP Status: {response.StatusCode}, Content: {errorContent}");
+            }
+
+            return await response.Content.ReadFromJsonAsync<ResponseModel>();
+        }
+
     }
 }
