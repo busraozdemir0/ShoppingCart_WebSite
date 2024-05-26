@@ -20,5 +20,6 @@ namespace Shop.Logic.Services
         ResponseModel ChangePassword(PasswordModel passwordModel);
         List<string> GetShippingStatusForOrder(string order_number);
         Task<string> MakePaymentStripe(string cardNumber, int expMonth, int expYear, string cvc, decimal value); // Kartla Stripe yontemi ile odeme
+        Task<string> MakePaymentPaypal(double total); // Paypal ile odeme yontemi
     }
 }

@@ -20,5 +20,14 @@ namespace Shop.DataModels.CustomModels
         public int Total { get; set; }
         public string? ShippingAddress { get; set; }
         public string? PaymentMode { get; set; }
+
+
+        public double PayPalPayment { get; set; }
+        public string? Stripecard_Number { get; set; }
+        public int Stripeexp_Month { get; set; }
+        public int Stripeexp_Year { get; set; }
+        public string? Stripeexp_Cvc { get; set; }
+        public decimal Stripe_Value { get; set; }
+        public string? orderReference { get; set; }
     }
 }

@@ -48,17 +48,9 @@ namespace Shop.Api.Controllers
             return Ok(data);
         }
 
-        [HttpPost]
-        [Route("Checkout")]
-        public IActionResult Checkout(List<CartModel> cartItems) // Birden fazla urun siparisi verilebilme durumu oldguu icin CartModel sinifini Liste biciminde tanimladik.
-        {
-            var data = _userService.Checkout(cartItems);
-            return Ok(data);
-        }
-
         [HttpGet]
         [Route("GetOrdersByCustomerId")]
-        public IActionResult GetOrdersByCustomerId(int customerId) 
+        public IActionResult GetOrdersByCustomerId(int customerId)
         {
             var data = _userService.GetOrdersByCustomerId(customerId);
             return Ok(data);
@@ -92,8 +84,58 @@ namespace Shop.Api.Controllers
         [Route("CheckoutStripe")]
         public IActionResult CheckoutStripe(string cardNumber, int expMonth, int expYear, string cvc, decimal value)
         {
-            var data = _userService.MakePaymentStripe(cardNumber,expMonth,expYear,cvc,value);
+            var data = _userService.MakePaymentStripe(cardNumber, expMonth, expYear, cvc, value);
             return Ok(data);
+        }
+
+        [HttpGet]
+        [Route("CheckoutPayPal")]
+        public IActionResult CheckoutPayPal(double total)
+        {
+            var url = _userService.MakePaymentPaypal(total);
+            return Ok(url);
+        }
+
+        [HttpPost]
+        [Route("Checkout")]
+        public async Task<IActionResult> Checkout(List<CartModel> cartItems) // Birden fazla urun siparisi verilebilme durumu oldguu icin CartModel sinifini Liste biciminde tanimladik.
+        {
+            // Hangi odeme yontemi secilmisse ona gore calismasi icin (PayPal ve Stripe kisminda api key'den dolayi calismiyor.)
+            ResponseModel responseModel = new ResponseModel();
+            var record = cartItems.FirstOrDefault();
+            if (record != null)
+            {
+                if (record.PaymentMode == "CashOnDelivery")
+                {
+                    responseModel = _userService.Checkout(cartItems);
+                }
+                if (record.PaymentMode == "PayPal")
+                {
+                    var data = _userService.MakePaymentPaypal(record.PayPalPayment);
+                    if (data != null)
+                    {
+                        var ref_number = data.Result.Split("&")[1];
+                        cartItems.FirstOrDefault().orderReference = ref_number.Split("=")[1];
+                        responseModel = _userService.Checkout(cartItems);
+                    }
+                }
+                if (record.PaymentMode == "Stripe")
+                {
+                    var data = await _userService.MakePaymentStripe(record.Stripecard_Number, record.Stripeexp_Month, record.Stripeexp_Year, record.Stripeexp_Cvc, record.Stripe_Value);
+                    if (data != null && data.Contains("Success"))
+                    {
+                        cartItems.FirstOrDefault().orderReference = data.Split("=")[1];
+                        responseModel = _userService.Checkout(cartItems);
+                    }
+                }
+            }
+
+
+            return Ok(responseModel);
+
+
+            //var data = _userService.Checkout(cartItems);
+            //return Ok(data);
         }
     }
 }

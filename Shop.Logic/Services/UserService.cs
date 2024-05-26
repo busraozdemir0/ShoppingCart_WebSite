@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Shop.DataModels.CustomModels;
 using Shop.DataModels.Models;
+using Shop.Logic.Paypal;
 using Stripe;
 using System;
 using System.Collections.Generic;
@@ -14,10 +16,12 @@ namespace Shop.Logic.Services
     public class UserService : IUserService
     {
         private readonly ShoppingCartDBContext _dbContext = null;
+        public IConfiguration configuration { get; }
 
-        public UserService(ShoppingCartDBContext dbContext)
+        public UserService(ShoppingCartDBContext dbContext, IConfiguration configuration)
         {
             _dbContext = dbContext;
+            this.configuration = configuration;
         }
         public List<CategoryModel> GetCategories()
         {
@@ -273,13 +277,14 @@ namespace Shop.Logic.Services
             return shipping_status;
         }
 
-        // Kartla odeme yontemi (Kredi karti bilgislerini dogrusan apiye gondermek guvenli olmadigi icin tam calismiyor)
+        // Stripe - Kartla odeme yontemi (Kredi karti bilgislerini dogrudan apiye gondermek guvenli olmadigi icin tam calismiyor)
         public async Task<string> MakePaymentStripe(string cardNumber, int expMonth, int expYear, string cvc, decimal value)
         {
             // http://localhost:5265/api/User/CheckoutStripe/?cardNumber=4242424242424242&expMonth=05&expYear=24&cvc=123&value=5
             try
             {
                 // Asagidaki satirda yer alan ApiKey https://dashboard.stripe.com/apikeys sitesinden olusturulmustur.
+                string response = string.Empty;
                 StripeConfiguration.ApiKey = "...";
                 var optionToken = new TokenCreateOptions
                 {
@@ -317,22 +322,36 @@ namespace Shop.Logic.Services
                 };
 
                 var service = new ChargeService();
-                Charge charge=await service.CreateAsync(options);
+                Charge charge = await service.CreateAsync(options);
 
                 if (charge.Paid)
                 {
-                    return "Success";
+                    return "Success" + "=" + charge.BalanceTransactionId;
                 }
                 else
                 {
                     return "Fail";
                 }
-
-                
+                return response;
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        // Paypal ile odeme yontemi islemleri
+        public async Task<string> MakePaymentPaypal(double total)
+        {
+            try
+            {
+                var paypalAPI = new PaypalAPI(configuration);
+                string url = await paypalAPI.getRedirectURLToPaypal(total, "USD");
+                return url;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
             }
         }
 

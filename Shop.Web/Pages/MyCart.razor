@@ -73,8 +73,16 @@
 
 </style>
 
+<style>
+    input[type=radio] {
+        border: 0px;
+        width: 20%;
+        height: 1em;
+    }
+</style>
+
 <div style="padding:10px 0px 0px 10px; text-align:right;">
-    
+
     @* // Sepet sayfasinin ustunde giris yapan kullanicinin adi ve emaili gozukmesi icin *@
     @if (@userName != null && userEmail != null)
     {
@@ -83,9 +91,9 @@
             &nbsp;&nbsp;
             <b>
                 Name: @userName
-                    &nbsp;&nbsp;
+                &nbsp;&nbsp;
                 Email: @userEmail
-                    &nbsp;&nbsp;
+                &nbsp;&nbsp;
             </b>
         </span>
     }
@@ -145,7 +153,49 @@
                 </tr>
                 <tr>
                     <td>Payment Mode</td>
-                    <td>@paymentMode</td>
+                    <td>
+                        <div style="text-align:left; margin:0px;">
+                            <EditForm Model="paymentModel">
+                                <InputRadioGroup @bind-Value="paymentModel.Name">
+                                    @foreach (var option in rdOptions)
+                                    {
+                                        <InputRadio Value="option" /> @option <br />
+                                    }
+                                </InputRadioGroup>
+                            </EditForm>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        @if(paymentModel.Name == "Stripe")
+                        {
+                            <div>
+                                <table>
+                                    <tr>
+                                        <td>Card Number</td>
+                                        <td><input type="email" name="email" placeholder="CardNumber" @bind="Stripecard_Number" autocomplete="off" style="width: 150px;" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Exp Month</td>
+                                        <td><input type="number" name="txtExpMonth" placeholder="ExpMonth" @bind="Stripeexp_Month" min="0" autocomplete="off" style="width: 150px;" /></td>
+
+                                    </tr>
+                                    <tr>
+                                        <td>Exp Year</td>
+                                        <td><input type="number" name="txtExpYear" placeholder="ExpYear" @bind="Stripeexp_Year" min="0" autocomplete="off" style="width: 150px;" /></td>
+
+                                    </tr>
+                                    <tr>
+                                        <td>CVC</td>
+                                        <td><input type="email" name="email" placeholder="CVC" @bind="Stripe_Cvc" min="0" autocomplete="off" style="width: 150px;" /></td>
+
+                                    </tr>
+                                </table>
+                            </div>
+                        }
+                    </td>
                 </tr>
                 <tr>
                     <td></td>
@@ -178,6 +228,21 @@
     public string userEmail { get; set; }
     public bool IsUserLoggedIn = false;
 
+    // *--* Odeme yontemini secme (PayPal ve Stripe API yontemleri calismiyor)
+    public string Stripecard_Number { get; set; }
+    public int Stripeexp_Month { get; set; }
+    public int Stripeexp_Year { get; set; }
+    public string Stripe_Cvc { get; set; }
+
+    PaymentModeModel paymentModel = new PaymentModeModel()
+        {
+            Name = "CashOnDelivery" // Varsayilan deger
+        };
+
+    List<string> rdOptions = new List<string> { "CashOnDelivery", "PayPal", "Stripe" };
+
+    // *--*
+
     [CascadingParameter]
     public EventCallback notify { get; set; }
 
@@ -185,7 +250,7 @@
     {
         shippingCharges = 5;
         subTotal = 0;
-        paymentMode = "Cash on Delivery"; // Odeme modu= kapida odeme
+        paymentMode = "CashOnDelivery"; // Odeme modu= kapida odeme
 
         return base.OnInitializedAsync();
     }
@@ -213,12 +278,30 @@
 
     private async Task Checkout_Click()
     {
-        if(myCart != null && myCart.Count > 0)
+        if (myCart != null && myCart.Count > 0)
         {
             myCart.FirstOrDefault().ShippingAddress = shippingAddress;
             myCart.FirstOrDefault().ShippingCharges = shippingCharges;
             myCart.FirstOrDefault().SubTotal = subTotal;
             myCart.FirstOrDefault().PaymentMode = paymentMode;
+
+            // Odeme yontemi PayPal olarak secilmisse
+            if (paymentModel.Name == "PayPal")
+            {
+                myCart.FirstOrDefault().PayPalPayment = finalTotal;
+                myCart.FirstOrDefault().PaymentMode = paymentModel.Name;
+            }
+
+            // Odeme yontemi Stripe olarak secilmisse
+            if (paymentModel.Name == "Stripe")
+            {
+                myCart.FirstOrDefault().Stripecard_Number = Stripecard_Number;
+                myCart.FirstOrDefault().Stripeexp_Month = Stripeexp_Month;
+                myCart.FirstOrDefault().Stripeexp_Year = Stripeexp_Year;
+                myCart.FirstOrDefault().Stripeexp_Cvc = Stripe_Cvc;
+                myCart.FirstOrDefault().Stripe_Value = finalTotal;
+                myCart.FirstOrDefault().PaymentMode = paymentModel.Name;
+            }
 
             var session_userKey = await sessionStorage.GetAsync<string>("userKey");
             if (session_userKey.Success)
@@ -232,18 +315,18 @@
             if (IsUserLoggedIn)
             {
                 var response = await userPanelService.Checkout(myCart);
-                if(response != null)
+                if (response != null)
                 {
                     myCart.Clear();
                     await sessionStorage.SetAsync("myCart", myCart);
-                    await sessionStorage.SetAsync("latestOrder",response.Message);
+                    await sessionStorage.SetAsync("latestOrder", response.Message);
                     await notify.InvokeAsync();
                     navManager.NavigateTo("myaccount");
                 }
             }
             else // Siparis verimi sirasinda eger kullanici giris yapmamissa giris sayfasina yonlendiriliyor.
             {
-                await sessionStorage.SetAsync("checkoutAlert","** Note : Login / Register to place your order!");
+                await sessionStorage.SetAsync("checkoutAlert", "** Note : Login / Register to place your order!");
                 navManager.NavigateTo("login");
             }
 
@@ -281,7 +364,7 @@
             // Sepet sayfasinin ustunde giris yapan kullanicinin adi ve emaili gozukmesi icin
             var session_userName = await sessionStorage.GetAsync<string>("userName");
             var session_userEmail = await sessionStorage.GetAsync<string>("userEmail");
-            if(session_userName.Success && session_userEmail.Success)
+            if (session_userName.Success && session_userEmail.Success)
             {
                 userName = session_userName.Value;
                 userEmail = session_userEmail.Value;
