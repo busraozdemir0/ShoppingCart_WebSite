@@ -132,5 +132,25 @@ namespace Shop.Admin.Services
             return await response.Content.ReadFromJsonAsync<bool>(); // Yaniti bool turune donusturme islemi
         }
 
+        public async Task<List<OrdersModel>> GetOrderDetail()
+        {
+            return await _httpClient.GetFromJsonAsync<List<OrdersModel>>("api/Admin/GetOrderDetail");
+        }
+
+        public async Task<CustomerOrderDetailModel> GetCustomerOrderDetailByOrderId(string orderId)
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<CustomerOrderDetailModel>("api/Admin/GetCustomerOrderDetailByOrderId/?orderId=" + orderId);
+
+            }
+            catch (Exception ex)
+            {
+                // Hata mesajını loglayın veya konsolda yazdırın
+                Console.WriteLine($"Hata: {ex.Message}");
+                return new CustomerOrderDetailModel();
+            }
+        }
+
     }
 }

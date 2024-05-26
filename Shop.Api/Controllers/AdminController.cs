@@ -106,5 +106,21 @@ namespace Shop.Api.Controllers
             var data = _adminService.UpdateProductStock(stock);
             return Ok(data);
         }
+
+        [HttpGet]
+        [Route("GetOrderDetail")] // Admin paneline verilen siparisleri getirme
+        public IActionResult GetOrderDetail()
+        {
+            var data = _adminService.GetOrderDetail();
+            return Ok(data);
+        }
+
+        [HttpGet]
+        [Route("GetCustomerOrderDetailByOrderId")] // OrderId'ye gore o siparisi veren musterinin bilgilerini getirme
+        public IActionResult GetCustomerOrderDetailByOrderId(string orderId)
+        {
+            var data = _adminService.GetCustomerOrderDetailByOrderId(orderId);
+            return Ok(data);
+        }
     }
 }

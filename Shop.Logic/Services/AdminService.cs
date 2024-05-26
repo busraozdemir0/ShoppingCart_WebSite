@@ -53,7 +53,7 @@ namespace Shop.Logic.Services
             }
 
         }
-   
+
         public CategoryModel SaveCategory(CategoryModel newCategory)
         {
             try
@@ -64,18 +64,18 @@ namespace Shop.Logic.Services
                 _dbContext.SaveChanges();
                 return newCategory;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw;
             }
-          
+
         }
-    
+
         public List<CategoryModel> GetCategories()
         {
             var data = _dbContext.Categories.ToList();
             List<CategoryModel> _categoryList = new List<CategoryModel>();
-            foreach(var c in data)
+            foreach (var c in data)
             {
                 CategoryModel _categoryModel = new CategoryModel();
                 _categoryModel.Id = c.Id;
@@ -84,12 +84,12 @@ namespace Shop.Logic.Services
             }
             return _categoryList;
         }
-   
+
         public bool UpdateCategory(CategoryModel categoryToUpdate)
         {
             bool flag = false;
             var _category = _dbContext.Categories.Where(x => x.Id == categoryToUpdate.Id).First();
-            if(_category is not null)
+            if (_category is not null)
             {
                 _category.Name = categoryToUpdate.Name;
                 _dbContext.Categories.Update(_category);
@@ -118,7 +118,7 @@ namespace Shop.Logic.Services
             List<Category> categoryData = _dbContext.Categories.ToList();
             List<Product> productData = _dbContext.Products.ToList();
             List<ProductModel> _productList = new List<ProductModel>();
-           
+
             foreach (var p in productData)
             {
                 ProductModel _productModel = new ProductModel();
@@ -128,7 +128,7 @@ namespace Shop.Logic.Services
                 _productModel.Stock = p.Stock;
                 _productModel.ImageUrl = p.ImageUrl;
                 _productModel.CategoryId = p.CategoryId;
-                _productModel.CategoryName = categoryData.Where(x => x.Id == p.CategoryId).Select(x=>x.Name).FirstOrDefault();
+                _productModel.CategoryName = categoryData.Where(x => x.Id == p.CategoryId).Select(x => x.Name).FirstOrDefault();
                 _productList.Add(_productModel);
             }
             return _productList;
@@ -151,7 +151,7 @@ namespace Shop.Logic.Services
         {
             try
             {
-                int nextProductId = _dbContext.Products.ToList().OrderByDescending(x => x.Id).Select(x=>x.Id).FirstOrDefault();
+                int nextProductId = _dbContext.Products.ToList().OrderByDescending(x => x.Id).Select(x => x.Id).FirstOrDefault();
                 return nextProductId;
             }
             catch (Exception ex)
@@ -174,7 +174,7 @@ namespace Shop.Logic.Services
                 _dbContext.SaveChanges();
                 return newProduct;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw;
             }
@@ -187,7 +187,7 @@ namespace Shop.Logic.Services
             List<Category> categoryData = _dbContext.Categories.ToList();
             List<Product> productData = _dbContext.Products.ToList();
 
-            foreach(var p in productData)
+            foreach (var p in productData)
             {
                 // Mevcutta var olan urunun adini, stogunu, kategorisini StockModel'e atama (ardindan bu Stock Model uzerinden stok guncelleme islemi yapilacak)
                 StockModel _stockModel = new StockModel();
@@ -206,7 +206,7 @@ namespace Shop.Logic.Services
         {
             bool flag = false;
             var _product = _dbContext.Products.Where(x => x.Id == stock.Id).First(); // Gelen stock id'sini Product tablosunda bul
-            if(_product != null) // product bos donmuyorsa stock guncelleme islemi
+            if (_product != null) // product bos donmuyorsa stock guncelleme islemi
             {
                 _product.Stock = stock.Stock + stock.NewStock; // Mevcutta var olan stok miktari uzerine yeni stok miktari ekleme
                 _dbContext.Products.Update(_product);
@@ -214,6 +214,52 @@ namespace Shop.Logic.Services
                 flag = true;
             }
             return flag;
+        }
+
+        public List<OrdersModel> GetOrderDetail()
+        {
+            List<OrdersModel> orderModelList = new List<OrdersModel>();
+            List<Product> productData = _dbContext.Products.ToList();
+
+            List<OrderDetail> orderDetailData = _dbContext.OrderDetails.ToList();
+
+            foreach (var o in orderDetailData)
+            {
+                OrdersModel _ordersModel = new OrdersModel();
+                _ordersModel.Id = o.Id;
+                _ordersModel.OrderId = o.OrderId;
+                _ordersModel.ProductId = o.ProductId;
+                _ordersModel.ProductName = productData.Where(x => x.Id == o.ProductId).Select(x => x.Name).FirstOrDefault();
+                _ordersModel.Quantity = o.Quantity;
+                _ordersModel.Price = o.Price;
+                _ordersModel.SubTotal = o.SubTotal;
+                _ordersModel.CreatedOn = o.CreatedOn;
+                orderModelList.Add(_ordersModel);
+
+            }
+            return orderModelList;
+        }
+
+        public CustomerOrderDetailModel GetCustomerOrderDetailByOrderId(string orderId)
+        {
+            List<Customer> customers = _dbContext.Customers.ToList(); // tum musteriler
+
+            var customerOrderDetail = _dbContext.CustomerOrders.Where(x => x.OrderId == orderId).FirstOrDefault();
+
+            CustomerOrderDetailModel model = new CustomerOrderDetailModel();
+            model.OrderId = customerOrderDetail.OrderId;
+            model.CustomerId = customerOrderDetail.CustomerId;
+            model.CustomerNameSurname = customers.Where(x => x.Id == model.CustomerId).Select(x => x.Name).FirstOrDefault(); // Modeldeki musteri id'ye esit olani musteriler tablosundan bul ve adini cek.
+            model.CustomerEmail = customers.Where(x => x.Id == model.CustomerId).Select(x => x.Email).FirstOrDefault(); // Musterinin e-mail bilgisi
+            model.CustomerMobileNo = customers.Where(x => x.Id == model.CustomerId).Select(x => x.MobileNo).FirstOrDefault(); // Musterinin telefon bilgisi
+            model.Total=customerOrderDetail.Total;
+            model.SubTotal=customerOrderDetail.SubTotal;
+            model.PaymentMode=customerOrderDetail.PaymentMode;
+            model.ShippingAddress=customerOrderDetail.ShippingAddress;
+            model.ShippingCharges=customerOrderDetail.ShippingCharges;
+            model.ShippingStatus=customerOrderDetail.ShippingStatus;
+
+            return model;
         }
     }
 }

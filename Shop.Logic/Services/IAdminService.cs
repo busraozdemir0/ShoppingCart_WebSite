@@ -23,5 +23,7 @@ namespace Shop.Logic.Services
 
         List<StockModel> GetProductStock();
         bool UpdateProductStock(StockModel stock);
+        List<OrdersModel> GetOrderDetail(); // Verilmis tum siparisler
+        CustomerOrderDetailModel GetCustomerOrderDetailByOrderId(string orderId); // Verilen siparisin kimin verdigi vs bilgileri gormek icin orderId'ye gore siparis bilgilerini getirme
     }
 }

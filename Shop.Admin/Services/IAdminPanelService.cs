@@ -14,5 +14,7 @@ namespace Shop.Admin.Services
         Task<ProductModel> SaveProduct(ProductModel newProduct);
         Task<List<StockModel>> GetProductStock();
         Task<bool> UpdateProductStock(StockModel stock);
+        Task<List<OrdersModel>> GetOrderDetail(); // Tum siparisleri listeleme
+        Task<CustomerOrderDetailModel> GetCustomerOrderDetailByOrderId(string orderId); // Gelen orderID'ye gore CustomerOrder tablosundaki musteri bilgilerini getirme
     }
 }
