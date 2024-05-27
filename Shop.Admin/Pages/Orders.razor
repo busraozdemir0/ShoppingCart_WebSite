@@ -71,8 +71,8 @@
                             <td>@order.OrderId</td>
                             <td>@order.ProductId - @order.ProductName</td>
                             <td>@order.Quantity</td>
-                            <td>@order.Price</td>
-                            <td>@order.SubTotal</td>
+                            <td>$@order.Price</td>
+                            <td>$@order.SubTotal</td>
                             <td>@order.CreatedOn</td>
                             <td><input type="button" class="btn btn-primary" value="Customer Details" @onclick="(()=>CustomerDetailButtonClick(order.OrderId))" /></td>
                         </tr>
@@ -116,13 +116,13 @@
                         <label>@customerOrderToDetail.ShippingAddress</label>
                         <br />
                         <label><b>Shipping Charges :</b> </label>
-                        <label>@customerOrderToDetail.ShippingCharges</label>
+                        <label>$@customerOrderToDetail.ShippingCharges</label>
                         <br />
                         <label><b>Shipping Status :</b> </label>
                         <label>@customerOrderToDetail.ShippingStatus</label>
                         <br />
-                        <label><b><i>Total :</i></b> @customerOrderToDetail.Total</label>
-                        <label><b><i>Sub Total :</i></b> @customerOrderToDetail.SubTotal</label>
+                        <label><b><i>Total :</i></b> $@customerOrderToDetail.Total</label>
+                        <label><b><i>Sub Total :</i></b> $@customerOrderToDetail.SubTotal</label>
                         <br />
                         <input type="button" class="btn btn-primary" value="Update Shipping Status" @onclick="(()=>ShowUpdateButtonClick(customerOrderToDetail))" />
 
