@@ -1,7 +1,8 @@
 # Shopping Cart - E-Ticaret Sitesi
 ## Projenin Genel Amacı
 ###
-Bu proje hintli bir YouTube kanalının yayınlamış olduğu eğitim serisinden esinlenilerek geliştirilmiştir.
+Bu proje Hintli bir YouTube kanalının yayınlamış olduğu eğitim serisinden esinlenilerek geliştirilmiştir. 
+https://www.youtube.com/watch?v=dmzwY7WXtO0&list=PLWpvttYT5mY4Z_GJJULctGOFO-His_w1S&index=2
 
 Shopping Cart; Admin paneli üzerinden eklenen ürün ve kategoriler ana sayfada görüntülenerek ve ürünü sepete ekleyerek sipariş verebilme üzerine kurgulanmış ve tümüyle ingilizce olarak geliştirilmiş e-ticaret mantığındaki mini web uygulamasıdır. 
 
