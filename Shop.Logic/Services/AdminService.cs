@@ -240,6 +240,7 @@ namespace Shop.Logic.Services
             return orderModelList;
         }
 
+        // Gelen order id'ye gore siparisi bulma (CustomerOrder tablosunda)
         public CustomerOrderDetailModel GetCustomerOrderDetailByOrderId(string orderId)
         {
             List<Customer> customers = _dbContext.Customers.ToList(); // tum musteriler
@@ -252,14 +253,29 @@ namespace Shop.Logic.Services
             model.CustomerNameSurname = customers.Where(x => x.Id == model.CustomerId).Select(x => x.Name).FirstOrDefault(); // Modeldeki musteri id'ye esit olani musteriler tablosundan bul ve adini cek.
             model.CustomerEmail = customers.Where(x => x.Id == model.CustomerId).Select(x => x.Email).FirstOrDefault(); // Musterinin e-mail bilgisi
             model.CustomerMobileNo = customers.Where(x => x.Id == model.CustomerId).Select(x => x.MobileNo).FirstOrDefault(); // Musterinin telefon bilgisi
-            model.Total=customerOrderDetail.Total;
-            model.SubTotal=customerOrderDetail.SubTotal;
-            model.PaymentMode=customerOrderDetail.PaymentMode;
-            model.ShippingAddress=customerOrderDetail.ShippingAddress;
-            model.ShippingCharges=customerOrderDetail.ShippingCharges;
-            model.ShippingStatus=customerOrderDetail.ShippingStatus;
+            model.Total = customerOrderDetail.Total;
+            model.SubTotal = customerOrderDetail.SubTotal;
+            model.PaymentMode = customerOrderDetail.PaymentMode;
+            model.ShippingAddress = customerOrderDetail.ShippingAddress;
+            model.ShippingCharges = customerOrderDetail.ShippingCharges;
+            model.ShippingStatus = customerOrderDetail.ShippingStatus;
 
             return model;
+        }
+
+        // Siparis durumunu guncelleme islemi
+        public bool UpdateOrderShippingStatus(CustomerOrderDetailModel order)
+        {
+            bool flag = false;
+            var _orderDetail = _dbContext.CustomerOrders.Where(x => x.OrderId == order.OrderId).First(); // CustomerOrder tablosunda Gelen modeldeki orderId ile esit olani bul
+            if (_orderDetail != null)
+            {
+                _orderDetail.ShippingStatus = order.ShippingStatus; // _orderDetail null donmuyorsa siparis durumunu guncelle
+                _dbContext.CustomerOrders.Update(_orderDetail);
+                _dbContext.SaveChanges();
+                flag = true; // islemler basarili oldugu takdirde flag true olarak donduruluyor.
+            }
+            return flag;
         }
     }
 }

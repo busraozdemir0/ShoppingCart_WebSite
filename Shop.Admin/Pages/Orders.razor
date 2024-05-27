@@ -123,11 +123,65 @@
                         <br />
                         <label><b><i>Total :</i></b> @customerOrderToDetail.Total</label>
                         <label><b><i>Sub Total :</i></b> @customerOrderToDetail.SubTotal</label>
+                        <br />
+                        <input type="button" class="btn btn-primary" value="Update Shipping Status" @onclick="(()=>ShowUpdateButtonClick(customerOrderToDetail))" />
+
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <input type="button" class="btn btn-secondary" value="Cancel" @onclick="ToggleDetailPopup" />
+            </div>
+        </div>
+    </div>
+}
+
+@if (showUpdateStatusPopup == true)
+{
+    <div class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Update Shipping Status</h5>
+                <span class="close" @onclick="ToggleUpdatePopup">&times;</span>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@customerOrderToUpdate" OnValidSubmit="UpdateStatusButtonClick">
+                    <DataAnnotationsValidator />
+                    <div class="form-row mb-1">
+                        <div class="form-group col-12">
+                            <label><b>Order Id :</b></label>
+                            <label>@customerOrderToUpdate.OrderId</label>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-12">
+                            <b>Shipping Status :</b>
+                            <InputText @bind-Value="customerOrderToUpdate.ShippingStatus" class="form-control" />
+                            <ValidationMessage For="@(()=>customerOrderToUpdate.ShippingStatus)" />
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+            <div class="modal-footer">
+                <input type="button" class="btn btn-primary" value="Update Shipping Status" @onclick="UpdateStatusButtonClick" />
+                <input type="button" class="btn btn-secondary" value="Cancel" @onclick="ToggleUpdatePopup" />
+            </div>
+        </div>
+    </div>
+}
+
+@if (successPopup == true)
+{
+    <div class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                Alert <span class="close" @onclick="ToggleSuccessPopup">&times;</span>
+            </div>
+            <div class="modal-body">
+                @Message
+            </div>
+            <div class="modal-footer">
+                <input type="button" class="btn btn-primary" value="Close" @onclick="ToggleSuccessPopup" />
             </div>
         </div>
     </div>
@@ -141,8 +195,12 @@
     public List<OrdersModel> orderList { get; set; }
     public OrdersModel orderModel { get; set; }
     public CustomerOrderDetailModel customerOrderToDetail { get; set; } // Siparisi kimin verdigi bilgisi icin siparis detaylari alerti acilacak
+    public CustomerOrderDetailModel customerOrderToUpdate = null;
 
     public bool showDetailPopup = false;
+    public bool showUpdateStatusPopup = false;
+    public bool successPopup = false;
+    public string Message = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -161,9 +219,42 @@
         ToggleDetailPopup();
     }
 
+    private void ShowUpdateButtonClick(CustomerOrderDetailModel orderDetail)
+    {
+        customerOrderToUpdate = orderDetail;
+        ToggleUpdatePopup();
+    }
+
+    private async Task UpdateStatusButtonClick()
+    {
+        bool flag = await adminPanelService.UpdateOrderShippingStatus(customerOrderToUpdate);
+        ToggleUpdatePopup();
+        if (flag)
+        {
+            Message = "Order Shipping Status Updated Successfully !";
+        }
+        else
+        {
+            Message = "Order Shipping Status Not Updated, Try Again !";
+        }
+        ToggleSuccessPopup();
+        customerOrderToUpdate = new CustomerOrderDetailModel();
+        await GetOrderDetail();
+    }
+
     private void ToggleDetailPopup()
     {
         showDetailPopup = showDetailPopup == true ? false : true;
+    }
+
+    private void ToggleUpdatePopup()
+    {
+        showUpdateStatusPopup = showUpdateStatusPopup == true ? false : true;
+    }
+
+    private void ToggleSuccessPopup()
+    {
+        successPopup = successPopup == true ? false : true;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

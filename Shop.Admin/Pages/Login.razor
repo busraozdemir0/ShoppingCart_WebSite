@@ -63,7 +63,7 @@
                 <EditForm Model="@loginModel" OnValidSubmit="Login_Click">
                     <DataAnnotationsValidator />
 
-                    <InputText type="email" name="EmailId" class="email" placeholder=email @bind-Value="loginModel.EmailId" autocoplete="off" />
+                    <InputText type="email" name="EmailId" class="email mb-2" placeholder=email @bind-Value="loginModel.EmailId" autocoplete="off" />
                     <ValidationMessage For="@(()=>loginModel.EmailId)" />
 
                     <InputText type="password" name="Password" class="password" placeholder=password @bind-Value="loginModel.Password" />

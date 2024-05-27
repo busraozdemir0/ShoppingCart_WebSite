@@ -122,5 +122,14 @@ namespace Shop.Api.Controllers
             var data = _adminService.GetCustomerOrderDetailByOrderId(orderId);
             return Ok(data);
         }
+
+
+        [HttpPost]
+        [Route("UpdateOrderShippingStatus")]  // Siparisin durumunu guncelleme islemi
+        public IActionResult UpdateOrderShippingStatus(CustomerOrderDetailModel order)
+        {
+            var data = _adminService.UpdateOrderShippingStatus(order);
+            return Ok(data);
+        }
     }
 }

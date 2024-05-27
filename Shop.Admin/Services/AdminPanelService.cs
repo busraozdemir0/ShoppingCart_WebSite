@@ -152,5 +152,19 @@ namespace Shop.Admin.Services
             }
         }
 
+        public async Task<bool> UpdateOrderShippingStatus(CustomerOrderDetailModel order)  // Siparisin durumunu guncelleme islemi
+        {
+
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/Admin/UpdateOrderShippingStatus", order);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"HTTP Status: {response.StatusCode}, Content: {errorContent}");
+            }
+
+            return await response.Content.ReadFromJsonAsync<bool>(); // Yaniti bool turune donusturme islemi
+        }
+
     }
 }
